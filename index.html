@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="author" content="Diego Estévez García - ADENDA">
+<meta name="description" content="Libro de mantenimiento del velero Libertad (Bénéteau Océanis 393)">
+<title>Libertad · Mantenimiento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: cuaderno de a bordo — banda azul ADENDA arriba, semáforo como franja de estado, pestañas por tipo de registro */
+:root{
+  --brand:#004f71; --brand-ink:#ffffff; --brand-soft:#e3eef3;
+  --accent:#ff1722;
+  --bg:#f5f7f8; --surface:#ffffff; --fg:#14212a; --muted:#5b6b75; --line:#d8e0e4;
+  --ok:#1f8a4c; --ok-bg:#e3f4ea;
+  --warn:#c77a00; --warn-bg:#fdf1dc;
+  --bad:#d11a22; --bad-bg:#fde5e5;
+  --none:#8a979f; --none-bg:#eceff1;
+  --f-display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"Barlow",Arial,Helvetica,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --brand:#0b3a52; --brand-ink:#eaf4f8; --brand-soft:#123446;
+  --bg:#0d151b; --surface:#152029; --fg:#e4ecf0; --muted:#93a4ae; --line:#26343e;
+  --ok:#4cc27d; --ok-bg:#16301f; --warn:#f0a93a; --warn-bg:#33270f; --bad:#ff5a5f; --bad-bg:#3a1517; --none:#7f8e97; --none-bg:#1d2a33;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --brand:#0b3a52; --brand-ink:#eaf4f8; --brand-soft:#123446;
+  --bg:#0d151b; --surface:#152029; --fg:#e4ecf0; --muted:#93a4ae; --line:#26343e;
+  --ok:#4cc27d; --ok-bg:#16301f; --warn:#f0a93a; --warn-bg:#33270f; --bad:#ff5a5f; --bad-bg:#3a1517; --none:#7f8e97; --none-bg:#1d2a33;
+  color-scheme:dark}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.45}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--brand)}
+.wrap{max-width:1100px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.band{background:var(--brand);color:var(--brand-ink);border-bottom:3px solid var(--accent)}
+header.band .wrap{padding-block:22px 18px;display:flex;flex-wrap:wrap;gap:12px 28px;align-items:flex-end;justify-content:space-between}
+.boat{display:flex;flex-direction:column;gap:2px}
+.eyebrow{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;opacity:.8}
+h1{font-family:var(--f-display);font-weight:700;font-size:44px;letter-spacing:.06em;margin:0;line-height:1;text-transform:uppercase}
+.specs{display:flex;flex-wrap:wrap;gap:6px 18px;font-family:var(--f-mono);font-size:12.5px;opacity:.92}
+.specs b{font-weight:500;opacity:.7;margin-right:4px}
+main .wrap{padding-block:20px 48px;display:grid;grid-template-columns:minmax(0,1fr);gap:22px}
+h2{font-family:var(--f-display);font-weight:600;font-size:22px;letter-spacing:.03em;margin:0;text-transform:uppercase;text-wrap:balance}
+.muted{color:var(--muted)}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+
+/* Semáforo */
+.lights{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.light{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;gap:12px;align-items:center;cursor:pointer;text-align:left;font:inherit;color:inherit}
+.light:hover{border-color:var(--muted)}
+.light[aria-pressed="true"]{outline:2px solid var(--brand);outline-offset:1px}
+.lamp{width:18px;height:18px;border-radius:50%;flex:none;box-shadow:inset 0 -2px 3px rgba(0,0,0,.18)}
+.lamp.rojo{background:var(--bad)} .lamp.ambar{background:var(--warn)} .lamp.verde{background:var(--ok)} .lamp.gris{background:var(--none)}
+.light .n{font-family:var(--f-display);font-size:30px;font-weight:700;line-height:1}
+.light .l{font-size:13px;color:var(--muted);line-height:1.2}
+@media (max-width:640px){.lights{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Alertas */
+.alerts{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--bad);border-radius:10px;padding:16px 18px;display:grid;gap:10px}
+.alerts.calm{border-left-color:var(--ok)}
+.alerts-head{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:baseline;justify-content:space-between}
+.alert-list{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+.alert-list li{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:6px 0;border-top:1px dashed var(--line)}
+.alert-list li:first-child{border-top:0}
+.alert-list .when{font-family:var(--f-mono);font-size:13px;white-space:nowrap}
+.alert-list .when.rojo{color:var(--bad)} .alert-list .when.ambar{color:var(--warn)}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.dot.rojo{background:var(--bad)}.dot.ambar{background:var(--warn)}.dot.verde{background:var(--ok)}.dot.gris{background:var(--none)}
+.thr{display:flex;gap:6px;align-items:center;font-size:13px}
+select,input,textarea{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+textarea{width:100%;min-height:64px}
+
+/* Pestañas */
+.tabs{display:flex;gap:4px;border-bottom:2px solid var(--line);overflow-x:auto}
+.tab{font-family:var(--f-display);font-size:17px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;background:none;border:0;color:var(--muted);padding:8px 14px;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
+.tab .c{font-family:var(--f-mono);font-size:12px;margin-left:4px;opacity:.7}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin:14px 0 10px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:4px 11px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.btn{font:inherit;font-weight:600;font-size:14px;border-radius:7px;padding:7px 13px;cursor:pointer;border:1px solid var(--brand);background:var(--brand);color:var(--brand-ink)}
+.btn.ghost{background:transparent;color:var(--fg);border-color:var(--line);font-weight:500}
+.btn.small{padding:4px 10px;font-size:13px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,.chip:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* Revisiones */
+.group{display:grid;gap:0;margin-bottom:18px}
+.group-h{font-family:var(--f-mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:6px 2px;border-bottom:1px solid var(--line)}
+.rev{display:grid;grid-template-columns:14px minmax(0,1fr) 128px 128px 150px auto;gap:12px;align-items:center;padding:11px 4px;border-bottom:1px solid var(--line)}
+.rev .name{font-weight:600}
+.rev .obs{font-size:13px;color:var(--muted);margin-top:2px}
+.rev .k{font-size:11px;font-family:var(--f-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.rev .v{font-family:var(--f-mono);font-size:13.5px}
+.meter{height:6px;border-radius:3px;background:var(--none-bg);overflow:hidden;margin-top:5px}
+.meter i{display:block;height:100%}
+.pill{display:inline-block;font-family:var(--f-mono);font-size:12px;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.pill.rojo{background:var(--bad-bg);color:var(--bad)}.pill.ambar{background:var(--warn-bg);color:var(--warn)}.pill.verde{background:var(--ok-bg);color:var(--ok)}.pill.gris{background:var(--none-bg);color:var(--muted)}
+.actions{display:flex;gap:6px;justify-content:flex-end}
+@media (max-width:820px){
+  .rev{grid-template-columns:14px minmax(0,1fr) auto;row-gap:6px}
+  .rev .c-ult,.rev .c-prox,.rev .c-state{grid-column:2 / 4}
+  .rev .c-ult,.rev .c-prox{display:flex;gap:8px;align-items:baseline}
+  .rev .actions{grid-column:2 / 4;justify-content:flex-start}
+}
+
+/* Arreglos */
+.task{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 4px;border-bottom:1px solid var(--line)}
+.task.done .t{text-decoration:line-through;color:var(--muted)}
+.prio{font-family:var(--f-mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:4px;border:1px solid var(--line)}
+.prio.alta{color:var(--bad);border-color:var(--bad)} .prio.media{color:var(--warn);border-color:var(--warn)} .prio.baja{color:var(--muted)}
+.state{font:inherit;font-size:12.5px;border-radius:999px;padding:3px 10px;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--fg);white-space:nowrap}
+.state.pendiente{border-color:var(--warn);color:var(--warn)} .state.revisar{border-color:var(--brand);color:var(--fg)} .state.hecho{border-color:var(--ok);color:var(--ok)}
+
+/* Gastos */
+.kpis{display:flex;flex-wrap:wrap;gap:10px 32px;margin:12px 0}
+.kpi .n{font-family:var(--f-display);font-size:30px;font-weight:700}
+.kpi .l{font-size:13px;color:var(--muted)}
+.chart{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;overflow-x:auto}
+.chart svg{display:block;width:100%;min-width:420px;height:auto}
+.tbl-wrap{overflow-x:auto;margin-top:14px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{font-family:var(--f-mono);font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:left;font-weight:500;padding:8px 6px;border-bottom:2px solid var(--line)}
+td{padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+td.num,th.num{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* Compras */
+.buy{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:9px 4px;border-bottom:1px solid var(--line)}
+.buy.done .t{text-decoration:line-through;color:var(--muted)}
+input[type=checkbox]{width:18px;height:18px;accent-color:var(--brand)}
+
+/* Ficha motor */
+.ficha{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.card h3{font-family:var(--f-display);font-size:17px;letter-spacing:.04em;text-transform:uppercase;margin:0 0 8px;color:var(--fg)}
+.card dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:0;font-size:14px}
+.card dt{color:var(--muted)} .card dd{margin:0;font-family:var(--f-mono);font-size:13px;min-width:0;overflow-wrap:anywhere}
+
+/* Diálogo */
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);padding:0;width:min(520px,calc(100vw - 32px))}
+dialog::backdrop{background:rgba(5,20,30,.45)}
+dialog form{padding:18px 20px;display:grid;gap:12px}
+.field{display:grid;gap:4px} .field label{font-size:13px;color:var(--muted)}
+.field input,.field select{width:100%}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dlg-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:4px}
+.notice{font-size:13px;padding:8px 12px;border-radius:8px;background:var(--brand-soft);color:var(--fg)}
+.empty{padding:28px 8px;color:var(--muted);text-align:center}
+.toast{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:9px 14px;border-radius:8px;font-size:14px;opacity:0;transform:translateY(8px);transition:.2s;pointer-events:none}
+.toast.on{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+footer{font-size:12.5px;color:var(--muted)}
+.foot{display:grid;gap:8px;border-top:1px solid var(--line);padding-top:14px}
+.foot p{margin:0}
+.foot-actions{display:flex;flex-wrap:wrap;gap:8px}
+</style>
+</head>
+<body>
+
+<header class="band"><div class="wrap">
+  <div class="boat">
+    <span class="eyebrow">Libro de mantenimiento</span>
+    <h1>Libertad</h1>
+  </div>
+  <div class="specs">
+    <span><b>Barco</b>Bénéteau Océanis 393</span>
+    <span><b>Motor</b>Volvo Penta D2-55</span>
+    <span><b>Hoy</b><span id="today"></span></span>
+  </div>
+</div></header>
+
+<main><div class="wrap">
+  <div id="sysnote" class="notice" hidden></div>
+
+  <section aria-label="Semáforo">
+    <div class="lights" id="lights"></div>
+  </section>
+
+  <section class="alerts" id="alerts" aria-live="polite">
+    <div class="alerts-head">
+      <h2>Alertas</h2>
+      <label class="thr">Avisar con
+        <select id="thr"><option value="30">30 días</option><option value="60" selected>60 días</option><option value="90">90 días</option></select>
+        de antelación</label>
+    </div>
+    <ul class="alert-list" id="alertList"><li class="muted">Cargando el libro de mantenimiento…</li></ul>
+  </section>
+
+  <section>
+    <div class="tabs" role="tablist" id="tabs">
+      <button class="tab" role="tab" data-tab="rev" aria-selected="true">Revisiones<span class="c" id="c-rev"></span></button>
+      <button class="tab" role="tab" data-tab="pen">Arreglos<span class="c" id="c-pen"></span></button>
+      <button class="tab" role="tab" data-tab="gas">Gastos<span class="c" id="c-gas"></span></button>
+      <button class="tab" role="tab" data-tab="com">Compras<span class="c" id="c-com"></span></button>
+      <button class="tab" role="tab" data-tab="mot">Ficha motor</button>
+    </div>
+
+    <div id="p-rev" role="tabpanel">
+      <div class="toolbar">
+        <div class="chips" id="sysChips"></div>
+        <button class="btn" id="addRev">Nueva revisión</button>
+      </div>
+      <div id="revList"><div class="empty">Las revisiones periódicas aparecerán aquí en cuanto cargue el libro.</div></div>
+    </div>
+
+    <div id="p-pen" role="tabpanel" hidden>
+      <div class="toolbar">
+        <div class="chips" id="penChips"></div>
+        <button class="btn" id="addPen">Nuevo arreglo</button>
+      </div>
+      <div id="penList"></div>
+    </div>
+
+    <div id="p-gas" role="tabpanel" hidden>
+      <div class="toolbar">
+        <div class="kpis" id="gasKpis"></div>
+        <button class="btn" id="addGas">Anotar gasto</button>
+      </div>
+      <div class="chart" id="gasChart"></div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Fecha</th><th>Actividad</th><th>Empresa</th><th class="num">Importe</th><th></th></tr></thead>
+        <tbody id="gasRows"></tbody>
+      </table></div>
+    </div>
+
+    <div id="p-com" role="tabpanel" hidden>
+      <div class="toolbar"><span class="muted">Lista de la compra para el barco</span><button class="btn" id="addCom">Añadir</button></div>
+      <div id="comList"></div>
+    </div>
+
+    <div id="p-mot" role="tabpanel" hidden>
+      <div class="ficha" style="margin-top:14px">
+        <div class="card"><h3>Identificación</h3><dl>
+          <dt>Modelo</dt><dd>Volvo Penta D2-55 E</dd>
+          <dt>Nº serie</dt><dd>D2 55 – E – 869615 : 5103987788P</dd>
+          <dt>Recambios</dt><dd>dam-marine.com · volvopenta.com/shop</dd>
+        </dl></div>
+        <div class="card"><h3>Aceite</h3><dl>
+          <dt>Capacidad</dt><dd>10,5 l (llenar ~9 l y comprobar cala)</dd>
+          <dt>Tipo</dt><dd>Castrol CRB Multi 15W40 CL-4/E7 (VDS-3)</dd>
+          <dt>Filtro</dt><dd>Filtron by Mann · DMarka Vigo</dd>
+          <dt>Tiempo</dt><dd>≈ 1,5 h</dd>
+        </dl></div>
+        <div class="card"><h3>Combustible</h3><dl>
+          <dt>Filtros</dt><dd>Antimoco + decantador + filtro motor</dd>
+          <dt>Decantador</dt><dd>Delphi 296 · Filtron 944</dd>
+          <dt>Ojo</dt><dd>Prefiltro y filtro motor no son iguales. Purgar.</dd>
+        </dl></div>
+        <div class="card"><h3>Refrigeración</h3><dl>
+          <dt>Impeller</dt><dd>Kit 21951346 · 3862281 · impeller 825940</dd>
+          <dt>Refrigerante</dt><dd>9,5 l · G12 verde 10–30 % (Carper)</dd>
+          <dt>Ánodo calentador</dt><dd>16 × 200 mm, rosca M6</dd>
+        </dl></div>
+        <div class="card"><h3>Admisión y correa</h3><dl>
+          <dt>Filtro aire</dt><dd>OEM 3580509 (equivalente RecMar / Parts4Engines)</dd>
+          <dt>Correa</dt><dd>978710 · ref. 3584086 (plana)</dd>
+        </dl></div>
+      </div>
+      <p class="muted" style="font-size:13px">Extraído de «00_MANTENIMIENTO MOTOR.docx» (carpeta 3_Mantenimiento).</p>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div class="foot-actions">
+      <button class="btn ghost small" id="exportBtn" type="button">Exportar copia (JSON)</button>
+      <button class="btn ghost small" id="importBtn" type="button">Importar copia</button>
+      <input type="file" id="importFile" accept="application/json,.json" hidden>
+      <button class="btn ghost small" id="resetBtn" type="button">Restaurar datos del Excel</button>
+    </div>
+    <p>Datos iniciales importados de «0_MANTENIMIENTO_INVENTARIO_GASTOS LIBERTAD.xlsx» el 17-10-2026. Los cambios se guardan en este navegador; exporta una copia para pasarlos a otro dispositivo.</p>
+  </footer>
+</div></main>
+
+<dialog id="dlg"><form id="dlgForm" method="dialog"></form></dialog>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const TODAY=new Date(); TODAY.setHours(0,0,0,0);
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const parse=s=>{if(!s)return null;const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const fmt=s=>{const d=parse(s);return d?d.toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'}).replace('.',''):'—'};
+const addMonths=(s,m)=>{const d=parse(s);const day=d.getDate();d.setDate(1);d.setMonth(d.getMonth()+m);const last=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();d.setDate(Math.min(day,last));return iso(d)};
+const days=s=>Math.round((parse(s)-TODAY)/864e5);
+const eur=n=>(n??0).toLocaleString('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0});
+const eur2=n=>n==null?'—':n.toLocaleString('es-ES',{style:'currency',currency:'EUR'});
+const PER={2:'Bimensual',3:'Trimestral',6:'Semestral',12:'Anual',24:'Cada 2 años',36:'Cada 3 años',60:'Cada 5 años',84:'Cada 7 años',120:'Cada 10 años'};
+const perTxt=m=>m?(PER[m]||('Cada '+m+' meses')):'Según estado';
+const SISTEMAS=['Motor','Casco y varada','Seguridad','Gas','Cubierta','Aparejo','Habitabilidad','Electricidad y electrónica'];
+$('#today').textContent=TODAY.toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'});
+
+let S={revisiones:[],pendientes:[],gastos:[],compras:[]};
+let loaded=false, db=null, readOnly=false;
+let thr=60, tab='rev', lightFilter=null, sysFilter='Todos', penFilter='abiertos';
+try{const t=localStorage.getItem('lib.thr');if(t)thr=+t;const tb=localStorage.getItem('lib.tab');if(tb)tab=tb}catch(e){}
+$('#thr').value=String(thr);
+
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('on'),2200)}
+
+function status(r){
+  let p=r.proxima;
+  if(!p&&r.ultima&&r.meses)p=addMonths(r.ultima,r.meses);
+  if(!p)return{st:'gris',p:null,d:null};
+  const d=days(p);
+  return{st:d<0?'rojo':d<=thr?'ambar':'verde',p,d};
+}
+function whenTxt(d){
+  if(d==null)return'Sin fecha';
+  if(d<0){const a=-d;return a>60?'Vencida hace '+Math.round(a/30.4)+' meses':'Vencida hace '+a+' días'}
+  if(d===0)return'Vence hoy';
+  return d>60?'En '+Math.round(d/30.4)+' meses':'En '+d+' días';
+}
+
+/* ---------- render ---------- */
+function render(){
+  const R=S.revisiones.map(r=>({...r,...status(r)}));
+  const cnt={rojo:0,ambar:0,verde:0,gris:0};R.forEach(r=>cnt[r.st]++);
+  const L=[['rojo','Vencidas'],['ambar','Próximas ('+thr+' d)'],['verde','Al día'],['gris','Sin fecha']];
+  $('#lights').innerHTML=L.map(([k,l])=>`<button class="light" data-light="${k}" aria-pressed="${lightFilter===k}"><span class="lamp ${k}"></span><span><span class="n">${loaded?cnt[k]:'–'}</span><br><span class="l">${l}</span></span></button>`).join('');
+
+  // alertas
+  const al=R.filter(r=>r.st==='rojo'||r.st==='ambar').sort((a,b)=>a.d-b.d);
+  const hp=S.pendientes.filter(p=>p.prioridad==='alta'&&p.estado!=='hecho');
+  $('#alerts').classList.toggle('calm',loaded&&!al.length);
+  let h='';
+  if(!loaded)h='<li class="muted">Cargando el libro de mantenimiento…</li>';
+  else{
+    h+=al.map(r=>`<li><span class="dot ${r.st}"></span><span><b>${esc(r.elemento)}</b> <span class="muted">· ${esc(r.sistema)}</span></span><span class="when ${r.st}">${whenTxt(r.d)}</span></li>`).join('');
+    if(hp.length)h+=`<li><span class="dot rojo" style="opacity:.55"></span><span><b>${hp.length} arreglos de prioridad alta abiertos</b> <span class="muted">· ${esc(hp.slice(0,3).map(p=>p.tarea).join(' · '))}${hp.length>3?'…':''}</span></span><span class="when"><button class="btn ghost small" data-go="pen">Ver</button></span></li>`;
+    if(!h)h='<li><span class="dot verde"></span><span>Todo al día. Ninguna revisión vence en los próximos '+thr+' días.</span><span></span></li>';
+  }
+  $('#alertList').innerHTML=h;
+
+  $('#c-rev').textContent=S.revisiones.length||'';
+  $('#c-pen').textContent=S.pendientes.filter(p=>p.estado!=='hecho').length||'';
+  $('#c-gas').textContent=S.gastos.length||'';
+  $('#c-com').textContent=S.compras.filter(c=>!c.comprado).length||'';
+
+  renderRev(R);renderPen();renderGas();renderCom();
+  document.querySelectorAll('.btn[data-w]').forEach(b=>b.disabled=readOnly);
+  ['#addRev','#addPen','#addGas','#addCom'].forEach(s=>$(s).disabled=readOnly||!loaded);
+}
+
+function renderRev(R){
+  const sys=['Todos',...SISTEMAS.filter(s=>R.some(r=>r.sistema===s))];
+  $('#sysChips').innerHTML=sys.map(s=>`<button class="chip" data-sys="${esc(s)}" aria-pressed="${sysFilter===s}">${esc(s)}</button>`).join('')+(lightFilter?` <button class="chip" data-clearlight aria-pressed="true">Filtro: ${({rojo:'vencidas',ambar:'próximas',verde:'al día',gris:'sin fecha'})[lightFilter]} ✕</button>`:'');
+  if(!loaded){return}
+  let rows=R.filter(r=>(sysFilter==='Todos'||r.sistema===sysFilter)&&(!lightFilter||r.st===lightFilter));
+  const order={rojo:0,ambar:1,verde:2,gris:3};
+  if(!rows.length){$('#revList').innerHTML='<div class="empty">No hay revisiones con este filtro.</div>';return}
+  const groups=SISTEMAS.filter(s=>rows.some(r=>r.sistema===s)).concat([...new Set(rows.map(r=>r.sistema))].filter(s=>!SISTEMAS.includes(s)));
+  $('#revList').innerHTML=groups.map(g=>{
+    const rs=rows.filter(r=>r.sistema===g).sort((a,b)=>order[a.st]-order[b.st]||(a.d??1e9)-(b.d??1e9));
+    return `<div class="group"><div class="group-h">${esc(g)} · ${rs.length}</div>`+rs.map(r=>{
+      let pct=0;
+      if(r.ultima&&r.p){const tot=(parse(r.p)-parse(r.ultima))/864e5;const el=(TODAY-parse(r.ultima))/864e5;pct=tot>0?Math.max(0,Math.min(100,el/tot*100)):100}
+      else if(r.st==='rojo')pct=100;
+      const col={rojo:'var(--bad)',ambar:'var(--warn)',verde:'var(--ok)',gris:'var(--none)'}[r.st];
+      return `<div class="rev">
+        <span class="dot ${r.st}" title="${r.st}"></span>
+        <div style="min-width:0"><div class="name">${esc(r.elemento)}</div>
+          <div class="obs">${esc(perTxt(r.meses))}${r.proveedor?' · '+esc(r.proveedor):''}${r.obs?' · '+esc(r.obs):''}</div></div>
+        <div class="c-ult"><div class="k">Última</div><div class="v">${fmt(r.ultima)}</div></div>
+        <div class="c-prox"><div class="k">Próxima</div><div class="v">${fmt(r.p)}</div></div>
+        <div class="c-state"><span class="pill ${r.st}">${whenTxt(r.d)}</span>${r.p&&r.ultima?`<div class="meter" title="${Math.round(pct)} % del intervalo consumido"><i style="width:${pct}%;background:${col}"></i></div>`:''}</div>
+        <div class="actions"><button class="btn small" data-w data-done="${esc(r.id)}">Hecho</button><button class="btn ghost small" data-w data-edit="${esc(r.id)}">Editar</button></div>
+      </div>`}).join('')+'</div>'}).join('');
+}
+
+function renderPen(){
+  const F=[['abiertos','Abiertos'],['alta','Prioridad alta'],['revisar','A revisar'],['hecho','Hechos'],['todos','Todos']];
+  $('#penChips').innerHTML=F.map(([k,l])=>`<button class="chip" data-pf="${k}" aria-pressed="${penFilter===k}">${l}</button>`).join('');
+  if(!loaded){$('#penList').innerHTML='';return}
+  const po={alta:0,media:1,baja:2,'':3};
+  let rows=S.pendientes.filter(p=>penFilter==='todos'||(penFilter==='abiertos'&&p.estado!=='hecho')||(penFilter==='alta'&&p.prioridad==='alta'&&p.estado!=='hecho')||p.estado===penFilter);
+  rows.sort((a,b)=>(a.estado==='hecho')-(b.estado==='hecho')||po[a.prioridad||'']-po[b.prioridad||'']);
+  $('#penList').innerHTML=rows.length?rows.map(p=>`<div class="task ${p.estado==='hecho'?'done':''}">
+    <span class="prio ${esc(p.prioridad)}">${esc(p.prioridad||'—')}</span>
+    <div style="min-width:0"><div class="t">${esc(p.tarea)}</div><div class="muted" style="font-size:13px">${[p.proveedor,p.obs].filter(Boolean).map(esc).join(' · ')}</div></div>
+    <div class="actions"><button class="state ${esc(p.estado)}" data-w data-cycle="${esc(p.id)}" title="Cambiar estado">${({pendiente:'Pendiente',revisar:'A revisar',hecho:'Hecho'})[p.estado]||p.estado}</button><button class="btn ghost small" data-w data-pedit="${esc(p.id)}">Editar</button></div>
+  </div>`).join(''):'<div class="empty">Nada en esta lista.</div>';
+}
+
+function renderGas(){
+  if(!loaded){return}
+  const G=S.gastos;
+  const total=G.reduce((s,g)=>s+(g.importe||0),0);
+  const byY={};G.forEach(g=>{const y=g.fecha?g.fecha.slice(0,4):'s/f';byY[y]=(byY[y]||0)+(g.importe||0)});
+  const years=Object.keys(byY).filter(y=>y!=='s/f').sort();
+  const cy=String(TODAY.getFullYear());
+  $('#gasKpis').innerHTML=`<div class="kpi"><div class="n mono">${eur(total)}</div><div class="l">Total registrado</div></div>
+    <div class="kpi"><div class="n mono">${eur(byY[cy]||0)}</div><div class="l">En ${cy} (con fecha)</div></div>
+    ${byY['s/f']?`<div class="kpi"><div class="n mono">${eur(byY['s/f'])}</div><div class="l">Sin fecha anotada</div></div>`:''}`;
+  // gráfico de barras por año
+  const keys=years.concat(byY['s/f']?['s/f']:[]);
+  const W=640,H=230,pl=56,pr=10,pt=18,pb=30;
+  const max=Math.max(...keys.map(k=>byY[k]),1);
+  const step=max>8000?2000:max>4000?1000:500;const top=Math.ceil(max/step)*step;
+  const bw=(W-pl-pr)/keys.length;
+  let svg=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Gasto por año">`;
+  for(let v=0;v<=top;v+=step){const y=pt+(H-pt-pb)*(1-v/top);svg+=`<line x1="${pl}" x2="${W-pr}" y1="${y}" y2="${y}" stroke="var(--line)" stroke-width="1"/><text x="${pl-8}" y="${y+4}" text-anchor="end" font-size="11" fill="var(--muted)" font-family="IBM Plex Mono,monospace">${(v/1000).toLocaleString('es-ES')}k</text>`}
+  keys.forEach((k,i)=>{const v=byY[k];const h=(H-pt-pb)*v/top;const x=pl+i*bw+bw*.2;const y=H-pb-h;
+    const fill=k==='s/f'?'var(--none)':k===cy?'var(--accent)':'var(--brand)';
+    svg+=`<rect x="${x}" y="${y}" width="${bw*.6}" height="${h}" rx="3" fill="${fill}"><title>${k}: ${eur(v)}</title></rect>
+      <text x="${x+bw*.3}" y="${y-5}" text-anchor="middle" font-size="11" fill="var(--fg)" font-family="IBM Plex Mono,monospace">${eur(v)}</text>
+      <text x="${x+bw*.3}" y="${H-pb+17}" text-anchor="middle" font-size="12" fill="var(--muted)" font-family="IBM Plex Mono,monospace">${k}</text>`});
+  svg+='</svg>';
+  $('#gasChart').innerHTML=svg;
+  const rows=[...G].sort((a,b)=>(b.fecha||'9999').localeCompare(a.fecha||'9999'));
+  $('#gasRows').innerHTML=rows.map(g=>`<tr><td class="mono" style="white-space:nowrap">${g.fecha?fmt(g.fecha):'<span class="muted">s/f</span>'}</td><td>${esc(g.actividad)}</td><td class="muted">${esc(g.empresa)}</td><td class="num">${eur2(g.importe)}</td><td><button class="btn ghost small" data-w data-gedit="${esc(g.id)}">Editar</button></td></tr>`).join('');
+}
+
+function renderCom(){
+  if(!loaded){$('#comList').innerHTML='';return}
+  const C=[...S.compras].sort((a,b)=>a.comprado-b.comprado);
+  $('#comList').innerHTML=C.length?C.map(c=>`<label class="buy ${c.comprado?'done':''}"><input type="checkbox" data-buy="${esc(c.id)}" ${c.comprado?'checked':''} ${readOnly?'disabled':''}>
+    <span style="min-width:0"><span class="t">${esc(c.objeto)}</span>${c.proveedor?` <span class="muted">· ${esc(c.proveedor)}</span>`:''}</span>
+    <span class="mono">${c.precio!=null?eur2(c.precio):''}</span></label>`).join(''):'<div class="empty">La lista está vacía.</div>';
+}
+
+/* ---------- pestañas y filtros ---------- */
+function setTab(t){tab=t;try{localStorage.setItem('lib.tab',t)}catch(e){}
+  document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
+  ['rev','pen','gas','com','mot'].forEach(k=>$('#p-'+k).hidden=k!==t)}
+setTab(['rev','pen','gas','com','mot'].includes(tab)?tab:'rev');
+$('#tabs').addEventListener('click',e=>{const b=e.target.closest('.tab');if(b)setTab(b.dataset.tab)});
+$('#thr').addEventListener('change',e=>{thr=+e.target.value;try{localStorage.setItem('lib.thr',thr)}catch(_){}render()});
+
+document.addEventListener('click',e=>{
+  const t=e.target.closest('button,[data-buy]');if(!t)return;
+  const d=t.dataset;
+  if(d.light){lightFilter=lightFilter===d.light?null:d.light;setTab('rev');render();return}
+  if('clearlight' in d){lightFilter=null;render();return}
+  if(d.sys){sysFilter=d.sys;render();return}
+  if(d.pf){penFilter=d.pf;render();return}
+  if(d.go){setTab(d.go);penFilter='alta';render();return}
+  if(d.done)return openDone(d.done);
+  if(d.edit)return openRev(d.edit);
+  if(d.cycle)return cycle(d.cycle);
+  if(d.pedit)return openPen(d.pedit);
+  if(d.gedit)return openGas(d.gedit);
+});
+document.addEventListener('change',e=>{const id=e.target.dataset&&e.target.dataset.buy;if(!id)return;
+  const c=S.compras.find(x=>x.id===id);if(!c)return;c.comprado=e.target.checked;save('compras',c.comprado?'Marcado como comprado':'Vuelve a la lista')});
+$('#addRev').onclick=()=>openRev(null);
+$('#addPen').onclick=()=>openPen(null);
+$('#addGas').onclick=()=>openGas(null);
+$('#addCom').onclick=()=>openCom();
+
+/* ---------- diálogos ---------- */
+const dlg=$('#dlg'),form=$('#dlgForm');let onSubmit=null;
+function openDlg(title,html,submit,extra=''){form.innerHTML=`<h2>${esc(title)}</h2>${html}<div class="dlg-actions">${extra}<button type="button" class="btn ghost" id="dlgCancel">Cancelar</button><button class="btn" type="submit">Guardar</button></div>`;
+  onSubmit=submit;$('#dlgCancel').onclick=()=>dlg.close();
+  const del=form.querySelector('[data-del]');if(del)del.onclick=()=>{del.textContent==='¿Seguro?'?(del._fn(),dlg.close()):(del.textContent='¿Seguro?')};
+  dlg.showModal();}
+form.addEventListener('submit',e=>{e.preventDefault();const fd=Object.fromEntries(new FormData(form));if(onSubmit&&onSubmit(fd)!==false)dlg.close()});
+const fld=(id,label,input)=>`<div class="field"><label for="${id}">${label}</label>${input}</div>`;
+const numOrNull=v=>{if(v==null||String(v).trim()==='')return null;const n=parseFloat(String(v).replace(',','.'));return isNaN(n)?null:n};
+const newId=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+
+function openDone(id){const r=S.revisiones.find(x=>x.id===id);if(!r)return;
+  const prox=r.meses?addMonths(iso(TODAY),r.meses):'';
+  openDlg('Registrar: '+r.elemento,
+    `<div class="row2">${fld('d_fecha','Fecha realizada',`<input id="d_fecha" name="fecha" type="date" required value="${iso(TODAY)}">`)}
+      ${fld('d_prox','Próxima revisión',`<input id="d_prox" name="proxima" type="date" value="${prox}">`)}</div>
+     <div class="row2">${fld('d_coste','Coste (€, opcional)',`<input id="d_coste" name="coste" inputmode="decimal" placeholder="0">`)}
+      ${fld('d_prov','Quién lo hizo',`<input id="d_prov" name="proveedor" value="${esc(r.proveedor||'')}">`)}</div>
+     ${fld('d_nota','Nota',`<input id="d_nota" name="nota" placeholder="Horas motor, piezas, observaciones…">`)}
+     <p class="muted" style="margin:0;font-size:13px">${r.meses?'La próxima se calcula sumando '+perTxt(r.meses).toLowerCase()+' a la fecha realizada.':'Sin periodicidad fija: indica la próxima fecha si la quieres vigilar.'} Si anotas un coste, se añade a Gastos.</p>`,
+    fd=>{
+      r.ultima=fd.fecha;r.proxima=fd.proxima||(r.meses?addMonths(fd.fecha,r.meses):null);
+      if(fd.proveedor)r.proveedor=fd.proveedor;
+      const coste=numOrNull(fd.coste);
+      save('revisiones','Revisión registrada').then(ok=>{
+        if(ok&&coste){S.gastos.push({id:newId('g'),fecha:fd.fecha,actividad:r.elemento+(fd.nota?' — '+fd.nota:''),empresa:fd.proveedor||'',importe:coste});save('gastos','Revisión y gasto registrados')}
+      });
+    });
+  const df=$('#d_fecha');if(r.meses)df.addEventListener('change',()=>{if(df.value)$('#d_prox').value=addMonths(df.value,r.meses)});
+}
+
+function openRev(id){const r=id?S.revisiones.find(x=>x.id===id):{elemento:'',sistema:'Motor',meses:12,ultima:null,proxima:null,obs:'',proveedor:'',prioridad:'media'};if(!r)return;
+  const per=[['','Según estado (sin periodicidad)'],...Object.entries(PER)];
+  openDlg(id?'Editar revisión':'Nueva revisión',
+    `${fld('r_el','Elemento',`<input id="r_el" name="elemento" required value="${esc(r.elemento)}">`)}
+     <div class="row2">${fld('r_sis','Sistema',`<select id="r_sis" name="sistema">${SISTEMAS.map(s=>`<option ${s===r.sistema?'selected':''}>${s}</option>`).join('')}</select>`)}
+      ${fld('r_per','Periodicidad',`<select id="r_per" name="meses">${per.map(([v,l])=>`<option value="${v}" ${String(r.meses??'')===v?'selected':''}>${l}</option>`).join('')}</select>`)}</div>
+     <div class="row2">${fld('r_ult','Última',`<input id="r_ult" name="ultima" type="date" value="${r.ultima||''}">`)}
+      ${fld('r_prox','Próxima (vacío = calcular)',`<input id="r_prox" name="proxima" type="date" value="${r.proxima||''}">`)}</div>
+     ${fld('r_prov','Proveedor / quién',`<input id="r_prov" name="proveedor" value="${esc(r.proveedor||'')}">`)}
+     ${fld('r_obs','Observaciones',`<textarea id="r_obs" name="obs">${esc(r.obs||'')}</textarea>`)}`,
+    fd=>{Object.assign(r,{elemento:fd.elemento.trim(),sistema:fd.sistema,meses:fd.meses?+fd.meses:null,ultima:fd.ultima||null,proxima:fd.proxima||null,proveedor:fd.proveedor.trim(),obs:fd.obs.trim()});
+      if(!id){r.id=newId('r');S.revisiones.push(r)}save('revisiones',id?'Revisión actualizada':'Revisión añadida')},
+    id?`<button type="button" class="btn ghost" data-del style="margin-right:auto;color:var(--bad)">Eliminar</button>`:'');
+  const del=form.querySelector('[data-del]');if(del)del._fn=()=>{S.revisiones=S.revisiones.filter(x=>x!==r);save('revisiones','Revisión eliminada')};
+}
+
+function cycle(id){const p=S.pendientes.find(x=>x.id===id);if(!p)return;const n={pendiente:'revisar',revisar:'hecho',hecho:'pendiente'};p.estado=n[p.estado]||'pendiente';
+  if(p.estado==='hecho')p.hecho=iso(TODAY);save('pendientes','Estado: '+({pendiente:'pendiente',revisar:'a revisar',hecho:'hecho'})[p.estado])}
+
+function openPen(id){const p=id?S.pendientes.find(x=>x.id===id):{tarea:'',estado:'pendiente',prioridad:'media',obs:'',proveedor:''};if(!p)return;
+  openDlg(id?'Editar arreglo':'Nuevo arreglo',
+    `${fld('p_t','Tarea',`<input id="p_t" name="tarea" required value="${esc(p.tarea)}">`)}
+     <div class="row2">${fld('p_pr','Prioridad',`<select id="p_pr" name="prioridad">${['alta','media','baja'].map(v=>`<option ${v===p.prioridad?'selected':''}>${v}</option>`).join('')}</select>`)}
+      ${fld('p_es','Estado',`<select id="p_es" name="estado">${[['pendiente','Pendiente'],['revisar','A revisar'],['hecho','Hecho']].map(([v,l])=>`<option value="${v}" ${v===p.estado?'selected':''}>${l}</option>`).join('')}</select>`)}</div>
+     ${fld('p_pv','Proveedor / quién',`<input id="p_pv" name="proveedor" value="${esc(p.proveedor||'')}">`)}
+     ${fld('p_o','Observaciones',`<textarea id="p_o" name="obs">${esc(p.obs||'')}</textarea>`)}`,
+    fd=>{Object.assign(p,{tarea:fd.tarea.trim(),prioridad:fd.prioridad,estado:fd.estado,proveedor:fd.proveedor.trim(),obs:fd.obs.trim()});
+      if(!id){p.id=newId('p');S.pendientes.push(p)}save('pendientes',id?'Arreglo actualizado':'Arreglo añadido')},
+    id?`<button type="button" class="btn ghost" data-del style="margin-right:auto;color:var(--bad)">Eliminar</button>`:'');
+  const del=form.querySelector('[data-del]');if(del)del._fn=()=>{S.pendientes=S.pendientes.filter(x=>x!==p);save('pendientes','Arreglo eliminado')};
+}
+
+function openGas(id){const g=id?S.gastos.find(x=>x.id===id):{fecha:iso(TODAY),actividad:'',empresa:'',importe:null};if(!g)return;
+  openDlg(id?'Editar gasto':'Anotar gasto',
+    `${fld('g_a','Concepto',`<input id="g_a" name="actividad" required value="${esc(g.actividad)}">`)}
+     <div class="row2">${fld('g_f','Fecha',`<input id="g_f" name="fecha" type="date" value="${g.fecha||''}">`)}
+      ${fld('g_i','Importe con IVA (€)',`<input id="g_i" name="importe" inputmode="decimal" value="${g.importe??''}">`)}</div>
+     ${fld('g_e','Empresa',`<input id="g_e" name="empresa" value="${esc(g.empresa||'')}">`)}`,
+    fd=>{Object.assign(g,{actividad:fd.actividad.trim(),fecha:fd.fecha||null,importe:numOrNull(fd.importe),empresa:fd.empresa.trim()});
+      if(!id){g.id=newId('g');S.gastos.push(g)}save('gastos',id?'Gasto actualizado':'Gasto anotado')},
+    id?`<button type="button" class="btn ghost" data-del style="margin-right:auto;color:var(--bad)">Eliminar</button>`:'');
+  const del=form.querySelector('[data-del]');if(del)del._fn=()=>{S.gastos=S.gastos.filter(x=>x!==g);save('gastos','Gasto eliminado')};
+}
+
+function openCom(){openDlg('Añadir a compras',
+  `${fld('c_o','Qué comprar',`<input id="c_o" name="objeto" required>`)}
+   <div class="row2">${fld('c_p','Dónde',`<input id="c_p" name="proveedor">`)}${fld('c_pr','Precio aprox. (€)',`<input id="c_pr" name="precio" inputmode="decimal">`)}</div>`,
+  fd=>{S.compras.push({id:newId('c'),objeto:fd.objeto.trim(),proveedor:fd.proveedor.trim(),precio:numOrNull(fd.precio),comprado:false});save('compras','Añadido a compras')})}
+
+/* ---------- datos (guardados en este navegador) ---------- */
+const SEED={"revisiones": [{"id": "filtros-desague-banos", "elemento": "Filtros desagüe baños", "sistema": "Habitabilidad", "meses": 2, "ultima": null, "proxima": null, "obs": "Se desenrosca con la mano. Hacerlo cada dos meses aprox.", "proveedor": "Yo", "prioridad": "media"}, {"id": "vaselina-bombas-banos", "elemento": "Vaselina bombas baños", "sistema": "Habitabilidad", "meses": 3, "ultima": null, "proxima": null, "obs": "Cada vez que se note duro. También quitar sal.", "proveedor": "Yo", "prioridad": "baja"}, {"id": "molinete-y-cadena", "elemento": "Molinete y cadena", "sistema": "Cubierta", "meses": 6, "ultima": "2022-05-29", "proxima": "2025-01-01", "obs": "Echar WD-40 o similar a la cadena. Pintar.", "proveedor": "Yo", "prioridad": "media"}, {"id": "descalcificacion-circuito-refrigeracion-", "elemento": "Descalcificación circuito refrigeración agua salada", "sistema": "Motor", "meses": 12, "ultima": null, "proxima": "2025-12-31", "obs": "Barnacle Buster, 2 litros aprox.", "proveedor": "", "prioridad": "alta"}, {"id": "cambio-aceite-y-filtro-motor", "elemento": "Cambio aceite y filtro motor", "sistema": "Motor", "meses": 12, "ultima": "2026-07-24", "proxima": "2027-10-01", "obs": "Volvo Penta D2-55: 10,5 l Castrol CRB Multi 15W40. En julio 2026, 3.230 horas.", "proveedor": "Yo", "prioridad": "alta"}, {"id": "aceite-reductora", "elemento": "Aceite reductora", "sistema": "Motor", "meses": 24, "ultima": "2022-08-01", "proxima": "2024-08-01", "obs": "", "proveedor": "", "prioridad": "alta"}, {"id": "cambio-filtros-gasoleo-antimoco-decantad", "elemento": "Cambio filtros gasóleo (antimoco, decantador, motor)", "sistema": "Motor", "meses": 12, "ultima": "2024-08-15", "proxima": "2025-08-01", "obs": "Decantador Delphi 296 o Filtron 944. Purgar tras el cambio.", "proveedor": "Yo", "prioridad": "alta"}, {"id": "impeller-rodete-bomba-agua-salada", "elemento": "Impeller / rodete bomba agua salada", "sistema": "Motor", "meses": 24, "ultima": "2026-02-01", "proxima": "2028-02-01", "obs": "Kit Volvo 21951346. Cambio cada 2 años o 200-300 horas. Cerrar y volver a abrir grifo de fondo.", "proveedor": "Yo", "prioridad": "alta"}, {"id": "cambio-termostato", "elemento": "Cambio termostato", "sistema": "Motor", "meses": 36, "ultima": null, "proxima": null, "obs": "Es necesario vaciar el refrigerante.", "proveedor": "", "prioridad": "media"}, {"id": "anodo-calentador-agua-caliente", "elemento": "Ánodo calentador agua caliente", "sistema": "Motor", "meses": 12, "ultima": "2025-06-08", "proxima": "2026-06-01", "obs": "Comprobar y, si procede, cambiar. 16 × 200 mm, rosca M6.", "proveedor": "Yo", "prioridad": "media"}, {"id": "revision-codos-y-escape", "elemento": "Revisión codos y escape", "sistema": "Motor", "meses": 36, "ultima": "2022-08-01", "proxima": "2027-01-01", "obs": "", "proveedor": "Carper", "prioridad": "alta"}, {"id": "limpieza-intercambiador-desmontado", "elemento": "Limpieza intercambiador (desmontado)", "sistema": "Motor", "meses": null, "ultima": null, "proxima": null, "obs": "En función del funcionamiento.", "proveedor": "", "prioridad": "media"}, {"id": "cambio-liquido-refrigerante", "elemento": "Cambio líquido refrigerante", "sistema": "Motor", "meses": 36, "ultima": "2025-01-25", "proxima": "2028-01-25", "obs": "9,5 litros. G12 al 50 % o menos es suficiente.", "proveedor": "Yo", "prioridad": "media"}, {"id": "revision-correa-alternador", "elemento": "Revisión correa alternador", "sistema": "Motor", "meses": 12, "ultima": null, "proxima": null, "obs": "Comprobar que esté bien. Correa 978710 / ref. 3584086.", "proveedor": "Yo", "prioridad": "media"}, {"id": "motor-fueraborda", "elemento": "Motor fueraborda", "sistema": "Motor", "meses": 12, "ultima": "2026-07-27", "proxima": "2027-08-01", "obs": "Náutica Baiona en 2025.", "proveedor": "Náutica Baiona", "prioridad": "media"}, {"id": "revisar-winches", "elemento": "Revisar winches", "sistema": "Cubierta", "meses": 24, "ultima": "2024-12-01", "proxima": "2027-03-01", "obs": "Limpiar con gasóleo.", "proveedor": "Yo", "prioridad": "media"}, {"id": "glicerina-gomas-portillos-y-escotillas", "elemento": "Glicerina gomas portillos y escotillas", "sistema": "Cubierta", "meses": 3, "ultima": "2024-11-01", "proxima": "2025-02-01", "obs": "", "proveedor": "Yo", "prioridad": "baja"}, {"id": "lubricar-con-wd-40", "elemento": "Lubricar con WD-40", "sistema": "Aparejo", "meses": 3, "ultima": null, "proxima": null, "obs": "Uñas del tangón, stoppers, guía del palo (gratil) y carro de mayor.", "proveedor": "Yo", "prioridad": "baja"}, {"id": "limpieza-teca-en-3-pasos", "elemento": "Limpieza teca en 3 pasos", "sistema": "Cubierta", "meses": 12, "ultima": "2025-05-01", "proxima": "2026-05-01", "obs": "Primavera. Sadira y Teak Wonder.", "proveedor": "Yo", "prioridad": "baja"}, {"id": "encerar-la-cubierta", "elemento": "Encerar la cubierta", "sistema": "Cubierta", "meses": 12, "ultima": null, "proxima": null, "obs": "Epifanes Seapower Cleaner & Wax 5 l.", "proveedor": "Yo", "prioridad": "baja"}, {"id": "revision-circuito-de-gas", "elemento": "Revisión circuito de gas", "sistema": "Gas", "meses": 60, "ultima": "2025-04-22", "proxima": "2029-04-22", "obs": "Mangueras cambiadas hasta 2029. Taller cerca de Ramallosa; también Magariños o Núñez (Vigo). Bombona: rosca a izquierdas al regulador.", "proveedor": "", "prioridad": "alta"}, {"id": "revision-anillas-nylon-botavara-palo", "elemento": "Revisión anillas nylon botavara–palo", "sistema": "Aparejo", "meses": 12, "ultima": null, "proxima": "2025-12-31", "obs": "", "proveedor": "Castor", "prioridad": "media"}, {"id": "bombona-de-gas", "elemento": "Bombona de gas", "sistema": "Gas", "meses": null, "ultima": "2025-04-22", "proxima": null, "obs": "Se puso nueva en abril de 2025; ver cuánto dura.", "proveedor": "", "prioridad": "baja"}, {"id": "bocina-seca-del-eje", "elemento": "Bocina seca del eje", "sistema": "Casco y varada", "meses": 84, "ultima": "2025-10-19", "proxima": "2032-10-19", "obs": "Purgar cada vez que se vare el barco y engrasar periódicamente.", "proveedor": "Iván Carper", "prioridad": "alta"}, {"id": "engrase-bocina-seca-del-eje", "elemento": "Engrase bocina seca del eje", "sistema": "Casco y varada", "meses": 12, "ultima": "2025-10-19", "proxima": "2026-10-19", "obs": "En cada varada.", "proveedor": "", "prioridad": "alta"}, {"id": "grifos-de-fondo", "elemento": "Grifos de fondo", "sistema": "Casco y varada", "meses": 120, "ultima": "2025-10-19", "proxima": "2035-10-19", "obs": "Forespar de plástico.", "proveedor": "Sernade", "prioridad": "alta"}, {"id": "varada-patente-y-anodos", "elemento": "Varada, patente y ánodos", "sistema": "Casco y varada", "meses": 12, "ultima": "2025-10-15", "proxima": "2026-10-15", "obs": "Última: patente Chuwoku, ánodo cono, pulido y grifos (Sernade).", "proveedor": "Sernade", "prioridad": "alta"}, {"id": "pulido-casco", "elemento": "Pulido casco", "sistema": "Casco y varada", "meses": null, "ultima": "2025-10-15", "proxima": null, "obs": "Cuando no se vea bonito.", "proveedor": "Sernade", "prioridad": "baja"}, {"id": "balsa-salvavidas", "elemento": "Balsa salvavidas", "sistema": "Seguridad", "meses": 36, "ultima": "2023-08-01", "proxima": "2026-08-01", "obs": "Revisión en estación homologada.", "proveedor": "Tridente", "prioridad": "alta"}, {"id": "revision-3-chalecos-skipper", "elemento": "Revisión 3 chalecos skipper", "sistema": "Seguridad", "meses": 60, "ultima": "2023-08-01", "proxima": "2028-08-01", "obs": "", "proveedor": "Tridente", "prioridad": "alta"}], "pendientes": [{"id": "reloj-y-sonda-temperatura-liquido", "tarea": "Reloj y sonda temperatura líquido", "estado": "hecho", "prioridad": "alta", "obs": "Cambiar refrigerante y vaciar para meter sonda-sensor", "proveedor": ""}, {"id": "montar-una-t-para-endulzar", "tarea": "Montar una T para endulzar", "estado": "hecho", "prioridad": "baja", "obs": "", "proveedor": "Yo"}, {"id": "revisar-soporte-motor-fueraborda", "tarea": "Revisar soporte motor fueraborda", "estado": "pendiente", "prioridad": "alta", "obs": "", "proveedor": ""}, {"id": "extractor-aire-popa-blower", "tarea": "Extractor aire popa (blower)", "estado": "revisar", "prioridad": "baja", "obs": "Comprobar si es el fusible", "proveedor": ""}, {"id": "muelle-contra", "tarea": "Muelle contra", "estado": "pendiente", "prioridad": "media", "obs": "", "proveedor": "Yo con Rafa"}, {"id": "cierre-rapido-consola-mesa-de-cartas-y-c", "tarea": "Cierre rápido consola mesa de cartas y cofres de popa", "estado": "hecho", "prioridad": "baja", "obs": "", "proveedor": "Castor"}, {"id": "reparar-labio-del-eje-trasero-doblado-po", "tarea": "Reparar labio del eje trasero (doblado por enganche de cabo)", "estado": "pendiente", "prioridad": "alta", "obs": "Al levantar el barco", "proveedor": "Carper"}, {"id": "reparar-corredera-entra-agua", "tarea": "Reparar corredera: entra agua", "estado": "pendiente", "prioridad": "alta", "obs": "Al levantar el barco", "proveedor": "Raymarine"}, {"id": "conectar-flotador-bomba-de-sentina-al-cu", "tarea": "Conectar flotador bomba de sentina al cuadro", "estado": "hecho", "prioridad": "media", "obs": "", "proveedor": "Sergio"}, {"id": "interruptor-para-el-molinete-siempre-on", "tarea": "Interruptor para el molinete (siempre ON)", "estado": "pendiente", "prioridad": "media", "obs": "", "proveedor": ""}, {"id": "enchufes-reles-domotica-12-v-y-220-v", "tarea": "Enchufes relés domótica 12 V y 220 V", "estado": "hecho", "prioridad": "baja", "obs": "", "proveedor": "Yo"}, {"id": "montar-giroscopo-al-piloto-seymo-gyro", "tarea": "Montar giróscopo al piloto (Seymo Gyro)", "estado": "pendiente", "prioridad": "media", "obs": "", "proveedor": ""}, {"id": "entrada-de-agua-en-ventana-del-salon", "tarea": "Entrada de agua en ventana del salón", "estado": "pendiente", "prioridad": "baja", "obs": "Ahora no entra", "proveedor": "Amura Vigo"}, {"id": "reparar-gelcoat-popa-golpe-pantalan-y-pe", "tarea": "Reparar gelcoat popa (golpe pantalán) y pegar cintón con Sika", "estado": "revisar", "prioridad": "alta", "obs": "", "proveedor": "Sergio"}, {"id": "mesa-mas-grande-en-banera", "tarea": "Mesa más grande en bañera", "estado": "pendiente", "prioridad": "baja", "obs": "", "proveedor": "Ducho"}, {"id": "colocar-tangon-en-palo", "tarea": "Colocar tangón en palo", "estado": "pendiente", "prioridad": "baja", "obs": "Ver con Mauri", "proveedor": ""}, {"id": "cambiar-insonorizador-del-motor", "tarea": "Cambiar insonorizador del motor", "estado": "hecho", "prioridad": "alta", "obs": "", "proveedor": "Sergio"}, {"id": "pies-hidraulicos-para-mesa-del-salon", "tarea": "Pies hidráulicos para mesa del salón", "estado": "pendiente", "prioridad": "baja", "obs": "", "proveedor": "Sergio"}, {"id": "asiento-de-popa", "tarea": "Asiento de popa", "estado": "pendiente", "prioridad": "baja", "obs": "", "proveedor": "Yo"}, {"id": "cambiar-tubo-calefaccion-roto-por-uno-ma", "tarea": "Cambiar tubo calefacción roto por uno más duro", "estado": "pendiente", "prioridad": "media", "obs": "", "proveedor": ""}, {"id": "fijar-bien-la-bateria-de-servicio", "tarea": "Fijar bien la batería de servicio", "estado": "pendiente", "prioridad": "baja", "obs": "Polipasto o similar", "proveedor": ""}, {"id": "pestillos-en-camarote-armador", "tarea": "Pestillos en camarote armador", "estado": "pendiente", "prioridad": "baja", "obs": "", "proveedor": ""}, {"id": "arreglar-cierres-escotillas-cocina-venta", "tarea": "Arreglar cierres escotillas cocina (ventana de Castor)", "estado": "pendiente", "prioridad": "alta", "obs": "", "proveedor": "Ducho"}, {"id": "teca-en-la-banera", "tarea": "Teca en la bañera", "estado": "hecho", "prioridad": "baja", "obs": "Hecho por Ducho, unos 900 € en agosto de 2025", "proveedor": "Ducho"}, {"id": "revision-soporte-motor-sin-motor-apretar", "tarea": "Revisión soporte motor sin motor: apretar tornillos", "estado": "pendiente", "prioridad": "baja", "obs": "", "proveedor": ""}, {"id": "rejilla-para-horno-39-5-26-5", "tarea": "Rejilla para horno 39,5 × 26,5", "estado": "pendiente", "prioridad": "baja", "obs": "", "proveedor": ""}, {"id": "arreglar-los-cueros-laterales", "tarea": "Arreglar los cueros laterales", "estado": "pendiente", "prioridad": "alta", "obs": "Ducho, 240 € el 18-9-25", "proveedor": "Ducho"}], "gastos": [{"id": "g003", "fecha": "2021-12-10", "actividad": "Patente y arreglo timon roto", "empresa": "Sernade", "importe": 530}, {"id": "g004", "fecha": "2021-12-10", "actividad": "Casquillo pala timon", "empresa": "Sernade", "importe": 200}, {"id": "g005", "fecha": "2022-01-12", "actividad": "Antena tv", "empresa": "Sonicolor", "importe": 148}, {"id": "g006", "fecha": "2022-01-12", "actividad": "Revision motor", "empresa": "Carper", "importe": 492}, {"id": "g007", "fecha": "2022-01-13", "actividad": "Subida palo luz todo horizonte", "empresa": "Javi", "importe": 51}, {"id": "g008", "fecha": "2022-03-09", "actividad": "Subida palo windex, vhf, focos luz nav", "empresa": "Javi", "importe": 243}, {"id": "g009", "fecha": "2022-03-29", "actividad": "Instalacion ais y conectar nmea plotter", "empresa": "Michu Electronautica", "importe": 392}, {"id": "g010", "fecha": "2022-06-01", "actividad": "Bomba agua", "empresa": "Amazon", "importe": 100}, {"id": "g011", "fecha": "2022-07-01", "actividad": "Dos stoppers nuevos", "empresa": "Bluemarinestore", "importe": 444}, {"id": "g012", "fecha": "2022-07-01", "actividad": "Bateria nueva motor", "empresa": "Ecobateria", "importe": 138}, {"id": "g013", "fecha": "2022-08-25", "actividad": "Motor nuevo", "empresa": "", "importe": 5000}, {"id": "g014", "fecha": "2022-08-25", "actividad": "Instalacion motor", "empresa": "", "importe": 4000}, {"id": "g016", "fecha": "2023-06-15", "actividad": "Bateria servicio agm 288 ah", "empresa": "", "importe": 400}, {"id": "g017", "fecha": "2023-06-17", "actividad": "Patente y rev motor", "empresa": "Sernade", "importe": 1298}, {"id": "g018", "fecha": "2023-06-17", "actividad": "Reparacion bimini", "empresa": "Susana", "importe": 60}, {"id": "g019", "fecha": "2023-08-01", "actividad": "Balsa salvavidas", "empresa": "Tridente", "importe": 2050}, {"id": "g020", "fecha": "2023-08-01", "actividad": "Revision 3 chalecos skipper", "empresa": "Tridente", "importe": 160}, {"id": "g021", "fecha": "2023-08-01", "actividad": "Quitar aerogenerador", "empresa": "Castor", "importe": 40}, {"id": "g022", "fecha": "2023-10-03", "actividad": "Castor arregla entradas agua candeleros, carro, proa, etc.", "empresa": "Castor", "importe": 90}, {"id": "g031", "fecha": "2024-02-13", "actividad": "Castor sube al palo y coloca driza de spi y polea. ayuda en colocacion tangon", "empresa": "Castor", "importe": 60}, {"id": "g035", "fecha": "2024-05-15", "actividad": "Clases de gennaker", "empresa": "Castor", "importe": 100}, {"id": "g036", "fecha": "2024-06-04", "actividad": "Michu cambia reles y pone todo en orden (30 eur + 20 a cuenta de pasar cable gordo al baño)", "empresa": "Michu", "importe": 50}, {"id": "g037", "fecha": "2024-03-13", "actividad": "Varada patente cambio grifo fondo cocina+tuberia baño proa y bomba tanque aguas sucias", "empresa": "Sernade", "importe": 1612}, {"id": "g038", "fecha": "2024-08-01", "actividad": "Colchonetas proa", "empresa": "Marcos", "importe": 600}, {"id": "g039", "fecha": "2024-08-02", "actividad": "Botalon", "empresa": "Sergo", "importe": 100}, {"id": "g040", "fecha": "2024-08-02", "actividad": "Botalon", "empresa": "Pepe Tubos", "importe": 150}, {"id": "g041", "fecha": "2024-09-21", "actividad": "Enderezar baranda proa+cambio luz proa y cable", "empresa": "Sergio", "importe": 80}, {"id": "g042", "fecha": "2025-06-10", "actividad": "Escotilla proa nueva", "empresa": "Yo En Hinelson", "importe": 582}, {"id": "g043", "fecha": "2025-06-26", "actividad": "Suelo teca sintetica", "empresa": "Ducho", "importe": 780}, {"id": "g044", "fecha": "2025-10-01", "actividad": "Arreglo lazy bag", "empresa": "Orka", "importe": 20}, {"id": "g045", "fecha": "2025-10-02", "actividad": "Colocacion webcam y ayuda lazy", "empresa": "Castor", "importe": 50}, {"id": "g046", "fecha": "2025-10-15", "actividad": "Patente chuwoku", "empresa": "Sernade", "importe": 411.4}, {"id": "g047", "fecha": "2025-10-15", "actividad": "Travel", "empresa": "Sernade", "importe": 183.92}, {"id": "g048", "fecha": "2025-10-15", "actividad": "Karcher", "empresa": "Sernade", "importe": 65.34}, {"id": "g049", "fecha": "2025-10-15", "actividad": "Cuna", "empresa": "Sernade", "importe": 32.67}, {"id": "g050", "fecha": "2025-10-15", "actividad": "2 dias varadero", "empresa": "Sernade", "importe": 75.5}, {"id": "g051", "fecha": "2025-10-15", "actividad": "Anodo cono", "empresa": "Sernade", "importe": 17.79}, {"id": "g052", "fecha": "2025-10-15", "actividad": "Pulido", "empresa": "Sernade", "importe": 363}, {"id": "g053", "fecha": "2025-10-15", "actividad": "Cambio grifos", "empresa": "Sernade", "importe": 271.04}, {"id": "g054", "fecha": "2025-10-15", "actividad": "Grifos", "empresa": "Sernade", "importe": 810.7}, {"id": "g055", "fecha": "2025-10-15", "actividad": "Golpes fibra", "empresa": "", "importe": 84.7}, {"id": "g057", "fecha": "2025-10-15", "actividad": "Cambio corredera nacomaritima - ricardo", "empresa": "Nacomaritima", "importe": 302.5}, {"id": "g058", "fecha": "2025-10-15", "actividad": "Bocina seca - prensa seco eje 30 tipo volvo", "empresa": "Ivan Carper Solitario", "importe": 151}, {"id": "g059", "fecha": "2025-10-15", "actividad": "Mano obra 2 personas a cangas 2 dias", "empresa": "Ivan Carper Solitario", "importe": 240}, {"id": "g060", "fecha": "2025-10-15", "actividad": "Cojinete", "empresa": "Ivan Carper Solitario", "importe": 93}, {"id": "g061", "fecha": "2025-10-15", "actividad": "Casquillo laton para cojinete y tornero pulir eje etc", "empresa": "Ivan Carper Solitario", "importe": 100}, {"id": "g064", "fecha": null, "actividad": "Arreglo bomba agua", "empresa": "Ivan Solitario", "importe": 280}, {"id": "g065", "fecha": null, "actividad": "Mesa barco", "empresa": "", "importe": 50}, {"id": "g066", "fecha": null, "actividad": "Pata mesa", "empresa": "", "importe": 40}, {"id": "g067", "fecha": null, "actividad": "Camara web nueva", "empresa": "", "importe": 100}, {"id": "g068", "fecha": null, "actividad": "Corredera st800 pasacascos nueva", "empresa": "", "importe": 222}, {"id": "g069", "fecha": null, "actividad": "Helice proa", "empresa": "", "importe": 5000}, {"id": "g071", "fecha": "2026-08-20", "actividad": "Carril mastil para mayor", "empresa": "Pipo - Veleros De Altura", "importe": 1700}, {"id": "g072", "fecha": "2026-08-24", "actividad": "Arreglar cremallera lazy bag", "empresa": "Gandara", "importe": 160}, {"id": "g073", "fecha": "2026-08-26", "actividad": "Baño electrico proa", "empresa": "Decathlon", "importe": 132}, {"id": "g074", "fecha": "2026-08-26", "actividad": "Manecillas puertas baño proa y camarote estribor", "empresa": "Cerrajeria Vigo Travesia Seguridad", "importe": 40}, {"id": "g075", "fecha": "2026-08-28", "actividad": "Electricista chapela helice proa, ventilador motor, vhf gps, sonda", "empresa": "Chapela", "importe": 170}], "compras": [{"id": "c1", "objeto": "Pulpos de goma (pesca)", "proveedor": "", "precio": null, "comprado": false}, {"id": "c2", "objeto": "Cabo al kilo y bumper", "proveedor": "A Guarda Socorro", "precio": null, "comprado": false}, {"id": "c3", "objeto": "Rejilla horno 42 × 28,5 cm", "proveedor": "", "precio": null, "comprado": false}, {"id": "c4", "objeto": "Tablet Oukitel RT7 4G", "proveedor": "", "precio": 300, "comprado": false}]};
+const KEY='libertad.mantenimiento.v1';
+let canStore=true;
+function load(){
+  try{const raw=localStorage.getItem(KEY);if(raw){const v=JSON.parse(raw);['revisiones','pendientes','gastos','compras'].forEach(k=>{if(Array.isArray(v[k]))S[k]=v[k]});return}}catch(e){canStore=false}
+  S=JSON.parse(JSON.stringify(SEED));
+}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify({...S,guardado:new Date().toISOString()}));return true}catch(e){canStore=false;return false}}
+async function save(name,msg){
+  render();
+  if(persist())toast(msg);
+  else{note('Este navegador no permite guardar (modo privado o almacenamiento bloqueado). Usa «Exportar copia» para no perder los cambios.');toast('Cambio aplicado, pero no guardado')}
+  return true;
+}
+function note(m){const n=$('#sysnote');n.textContent=m;n.hidden=false}
+
+$('#exportBtn').onclick=()=>{
+  const blob=new Blob([JSON.stringify({...S,exportado:new Date().toISOString()},null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='libertad-mantenimiento-'+iso(new Date())+'.json';
+  document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500);toast('Copia exportada');
+};
+$('#importBtn').onclick=()=>$('#importFile').click();
+$('#importFile').addEventListener('change',async e=>{
+  const f=e.target.files[0];if(!f)return;
+  try{const v=JSON.parse(await f.text());
+    if(!['revisiones','pendientes','gastos','compras'].every(k=>Array.isArray(v[k])))throw new Error('formato');
+    ['revisiones','pendientes','gastos','compras'].forEach(k=>S[k]=v[k]);persist();render();toast('Copia importada');
+  }catch(err){toast('El archivo no es una copia válida del libro')}
+  e.target.value='';
+});
+$('#resetBtn').onclick=e=>{const b=e.currentTarget;
+  if(b.dataset.armed){S=JSON.parse(JSON.stringify(SEED));persist();render();b.textContent='Restaurar datos del Excel';delete b.dataset.armed;toast('Datos originales restaurados')}
+  else{b.dataset.armed='1';b.textContent='Pulsa otra vez para confirmar';setTimeout(()=>{if(b.dataset.armed){delete b.dataset.armed;b.textContent='Restaurar datos del Excel'}},4000)}
+};
+
+load();loaded=true;
+if(!canStore)note('Este navegador no permite guardar (modo privado o almacenamiento bloqueado). Usa «Exportar copia» para no perder los cambios.');
+render();
+})();
+</script>
+</body>
+</html>
