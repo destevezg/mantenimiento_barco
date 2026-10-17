@@ -1,0 +1,546 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Libertad · Mantenimiento</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: cuaderno de a bordo — banda azul ADENDA arriba, semáforo como franja de estado, pestañas por tipo de registro */
+:root{
+  --brand:#004f71; --brand-ink:#ffffff; --brand-soft:#e3eef3;
+  --accent:#ff1722;
+  --bg:#f5f7f8; --surface:#ffffff; --fg:#14212a; --muted:#5b6b75; --line:#d8e0e4;
+  --ok:#1f8a4c; --ok-bg:#e3f4ea;
+  --warn:#c77a00; --warn-bg:#fdf1dc;
+  --bad:#d11a22; --bad-bg:#fde5e5;
+  --none:#8a979f; --none-bg:#eceff1;
+  --f-display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"Barlow",Arial,Helvetica,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --brand:#0b3a52; --brand-ink:#eaf4f8; --brand-soft:#123446;
+  --bg:#0d151b; --surface:#152029; --fg:#e4ecf0; --muted:#93a4ae; --line:#26343e;
+  --ok:#4cc27d; --ok-bg:#16301f; --warn:#f0a93a; --warn-bg:#33270f; --bad:#ff5a5f; --bad-bg:#3a1517; --none:#7f8e97; --none-bg:#1d2a33;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --brand:#0b3a52; --brand-ink:#eaf4f8; --brand-soft:#123446;
+  --bg:#0d151b; --surface:#152029; --fg:#e4ecf0; --muted:#93a4ae; --line:#26343e;
+  --ok:#4cc27d; --ok-bg:#16301f; --warn:#f0a93a; --warn-bg:#33270f; --bad:#ff5a5f; --bad-bg:#3a1517; --none:#7f8e97; --none-bg:#1d2a33;
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.45}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--brand)}
+.wrap{max-width:1100px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.band{background:var(--brand);color:var(--brand-ink);border-bottom:3px solid var(--accent)}
+header.band .wrap{padding-block:22px 18px;display:flex;flex-wrap:wrap;gap:12px 28px;align-items:flex-end;justify-content:space-between}
+.boat{display:flex;flex-direction:column;gap:2px}
+.eyebrow{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;opacity:.8}
+h1{font-family:var(--f-display);font-weight:700;font-size:44px;letter-spacing:.06em;margin:0;line-height:1;text-transform:uppercase}
+.specs{display:flex;flex-wrap:wrap;gap:6px 18px;font-family:var(--f-mono);font-size:12.5px;opacity:.92}
+.specs b{font-weight:500;opacity:.7;margin-right:4px}
+main .wrap{padding-block:20px 48px;display:grid;gap:22px}
+h2{font-family:var(--f-display);font-weight:600;font-size:22px;letter-spacing:.03em;margin:0;text-transform:uppercase;text-wrap:balance}
+.muted{color:var(--muted)}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+
+/* Semáforo */
+.lights{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.light{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;gap:12px;align-items:center;cursor:pointer;text-align:left;font:inherit;color:inherit}
+.light:hover{border-color:var(--muted)}
+.light[aria-pressed="true"]{outline:2px solid var(--brand);outline-offset:1px}
+.lamp{width:18px;height:18px;border-radius:50%;flex:none;box-shadow:inset 0 -2px 3px rgba(0,0,0,.18)}
+.lamp.rojo{background:var(--bad)} .lamp.ambar{background:var(--warn)} .lamp.verde{background:var(--ok)} .lamp.gris{background:var(--none)}
+.light .n{font-family:var(--f-display);font-size:30px;font-weight:700;line-height:1}
+.light .l{font-size:13px;color:var(--muted);line-height:1.2}
+@media (max-width:640px){.lights{grid-template-columns:repeat(2,1fr)}}
+
+/* Alertas */
+.alerts{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--bad);border-radius:10px;padding:16px 18px;display:grid;gap:10px}
+.alerts.calm{border-left-color:var(--ok)}
+.alerts-head{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:baseline;justify-content:space-between}
+.alert-list{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+.alert-list li{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:6px 0;border-top:1px dashed var(--line)}
+.alert-list li:first-child{border-top:0}
+.alert-list .when{font-family:var(--f-mono);font-size:13px;white-space:nowrap}
+.alert-list .when.rojo{color:var(--bad)} .alert-list .when.ambar{color:var(--warn)}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.dot.rojo{background:var(--bad)}.dot.ambar{background:var(--warn)}.dot.verde{background:var(--ok)}.dot.gris{background:var(--none)}
+.thr{display:flex;gap:6px;align-items:center;font-size:13px}
+select,input,textarea{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+textarea{width:100%;min-height:64px}
+
+/* Pestañas */
+.tabs{display:flex;gap:4px;border-bottom:2px solid var(--line);overflow-x:auto}
+.tab{font-family:var(--f-display);font-size:17px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;background:none;border:0;color:var(--muted);padding:8px 14px;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
+.tab .c{font-family:var(--f-mono);font-size:12px;margin-left:4px;opacity:.7}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin:14px 0 10px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:4px 11px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.btn{font:inherit;font-weight:600;font-size:14px;border-radius:7px;padding:7px 13px;cursor:pointer;border:1px solid var(--brand);background:var(--brand);color:var(--brand-ink)}
+.btn.ghost{background:transparent;color:var(--fg);border-color:var(--line);font-weight:500}
+.btn.small{padding:4px 10px;font-size:13px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,.chip:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* Revisiones */
+.group{display:grid;gap:0;margin-bottom:18px}
+.group-h{font-family:var(--f-mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:6px 2px;border-bottom:1px solid var(--line)}
+.rev{display:grid;grid-template-columns:14px minmax(0,1fr) 128px 128px 150px auto;gap:12px;align-items:center;padding:11px 4px;border-bottom:1px solid var(--line)}
+.rev .name{font-weight:600}
+.rev .obs{font-size:13px;color:var(--muted);margin-top:2px}
+.rev .k{font-size:11px;font-family:var(--f-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.rev .v{font-family:var(--f-mono);font-size:13.5px}
+.meter{height:6px;border-radius:3px;background:var(--none-bg);overflow:hidden;margin-top:5px}
+.meter i{display:block;height:100%}
+.pill{display:inline-block;font-family:var(--f-mono);font-size:12px;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.pill.rojo{background:var(--bad-bg);color:var(--bad)}.pill.ambar{background:var(--warn-bg);color:var(--warn)}.pill.verde{background:var(--ok-bg);color:var(--ok)}.pill.gris{background:var(--none-bg);color:var(--muted)}
+.actions{display:flex;gap:6px;justify-content:flex-end}
+@media (max-width:820px){
+  .rev{grid-template-columns:14px minmax(0,1fr) auto;row-gap:6px}
+  .rev .c-ult,.rev .c-prox,.rev .c-state{grid-column:2 / 4}
+  .rev .c-ult,.rev .c-prox{display:flex;gap:8px;align-items:baseline}
+  .rev .actions{grid-column:2 / 4;justify-content:flex-start}
+}
+
+/* Arreglos */
+.task{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 4px;border-bottom:1px solid var(--line)}
+.task.done .t{text-decoration:line-through;color:var(--muted)}
+.prio{font-family:var(--f-mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:4px;border:1px solid var(--line)}
+.prio.alta{color:var(--bad);border-color:var(--bad)} .prio.media{color:var(--warn);border-color:var(--warn)} .prio.baja{color:var(--muted)}
+.state{font:inherit;font-size:12.5px;border-radius:999px;padding:3px 10px;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--fg);white-space:nowrap}
+.state.pendiente{border-color:var(--warn);color:var(--warn)} .state.revisar{border-color:var(--brand);color:var(--fg)} .state.hecho{border-color:var(--ok);color:var(--ok)}
+
+/* Gastos */
+.kpis{display:flex;flex-wrap:wrap;gap:10px 32px;margin:12px 0}
+.kpi .n{font-family:var(--f-display);font-size:30px;font-weight:700}
+.kpi .l{font-size:13px;color:var(--muted)}
+.chart{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;overflow-x:auto}
+.chart svg{display:block;width:100%;min-width:420px;height:auto}
+.tbl-wrap{overflow-x:auto;margin-top:14px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{font-family:var(--f-mono);font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:left;font-weight:500;padding:8px 6px;border-bottom:2px solid var(--line)}
+td{padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+td.num,th.num{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* Compras */
+.buy{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:9px 4px;border-bottom:1px solid var(--line)}
+.buy.done .t{text-decoration:line-through;color:var(--muted)}
+input[type=checkbox]{width:18px;height:18px;accent-color:var(--brand)}
+
+/* Ficha motor */
+.ficha{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.card h3{font-family:var(--f-display);font-size:17px;letter-spacing:.04em;text-transform:uppercase;margin:0 0 8px;color:var(--fg)}
+.card dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:0;font-size:14px}
+.card dt{color:var(--muted)} .card dd{margin:0;font-family:var(--f-mono);font-size:13px;min-width:0;overflow-wrap:anywhere}
+
+/* Diálogo */
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);padding:0;width:min(520px,calc(100vw - 32px))}
+dialog::backdrop{background:rgba(5,20,30,.45)}
+dialog form{padding:18px 20px;display:grid;gap:12px}
+.field{display:grid;gap:4px} .field label{font-size:13px;color:var(--muted)}
+.field input,.field select{width:100%}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dlg-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:4px}
+.notice{font-size:13px;padding:8px 12px;border-radius:8px;background:var(--brand-soft);color:var(--fg)}
+.empty{padding:28px 8px;color:var(--muted);text-align:center}
+.toast{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:9px 14px;border-radius:8px;font-size:14px;opacity:0;transform:translateY(8px);transition:.2s;pointer-events:none}
+.toast.on{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+footer{font-size:12.5px;color:var(--muted)}
+</style>
+
+<header class="band"><div class="wrap">
+  <div class="boat">
+    <span class="eyebrow">Libro de mantenimiento</span>
+    <h1>Libertad</h1>
+  </div>
+  <div class="specs">
+    <span><b>Barco</b>Bénéteau Océanis 393</span>
+    <span><b>Motor</b>Volvo Penta D2-55</span>
+    <span><b>Hoy</b><span id="today"></span></span>
+  </div>
+</div></header>
+
+<main><div class="wrap">
+  <div id="sysnote" class="notice" hidden></div>
+
+  <section aria-label="Semáforo">
+    <div class="lights" id="lights"></div>
+  </section>
+
+  <section class="alerts" id="alerts" aria-live="polite">
+    <div class="alerts-head">
+      <h2>Alertas</h2>
+      <label class="thr">Avisar con
+        <select id="thr"><option value="30">30 días</option><option value="60" selected>60 días</option><option value="90">90 días</option></select>
+        de antelación</label>
+    </div>
+    <ul class="alert-list" id="alertList"><li class="muted">Cargando el libro de mantenimiento…</li></ul>
+  </section>
+
+  <section>
+    <div class="tabs" role="tablist" id="tabs">
+      <button class="tab" role="tab" data-tab="rev" aria-selected="true">Revisiones<span class="c" id="c-rev"></span></button>
+      <button class="tab" role="tab" data-tab="pen">Arreglos<span class="c" id="c-pen"></span></button>
+      <button class="tab" role="tab" data-tab="gas">Gastos<span class="c" id="c-gas"></span></button>
+      <button class="tab" role="tab" data-tab="com">Compras<span class="c" id="c-com"></span></button>
+      <button class="tab" role="tab" data-tab="mot">Ficha motor</button>
+    </div>
+
+    <div id="p-rev" role="tabpanel">
+      <div class="toolbar">
+        <div class="chips" id="sysChips"></div>
+        <button class="btn" id="addRev">Nueva revisión</button>
+      </div>
+      <div id="revList"><div class="empty">Las revisiones periódicas aparecerán aquí en cuanto cargue el libro.</div></div>
+    </div>
+
+    <div id="p-pen" role="tabpanel" hidden>
+      <div class="toolbar">
+        <div class="chips" id="penChips"></div>
+        <button class="btn" id="addPen">Nuevo arreglo</button>
+      </div>
+      <div id="penList"></div>
+    </div>
+
+    <div id="p-gas" role="tabpanel" hidden>
+      <div class="toolbar">
+        <div class="kpis" id="gasKpis"></div>
+        <button class="btn" id="addGas">Anotar gasto</button>
+      </div>
+      <div class="chart" id="gasChart"></div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Fecha</th><th>Actividad</th><th>Empresa</th><th class="num">Importe</th><th></th></tr></thead>
+        <tbody id="gasRows"></tbody>
+      </table></div>
+    </div>
+
+    <div id="p-com" role="tabpanel" hidden>
+      <div class="toolbar"><span class="muted">Lista de la compra para el barco</span><button class="btn" id="addCom">Añadir</button></div>
+      <div id="comList"></div>
+    </div>
+
+    <div id="p-mot" role="tabpanel" hidden>
+      <div class="ficha" style="margin-top:14px">
+        <div class="card"><h3>Identificación</h3><dl>
+          <dt>Modelo</dt><dd>Volvo Penta D2-55 E</dd>
+          <dt>Nº serie</dt><dd>D2 55 – E – 869615 : 5103987788P</dd>
+          <dt>Recambios</dt><dd>dam-marine.com · volvopenta.com/shop</dd>
+        </dl></div>
+        <div class="card"><h3>Aceite</h3><dl>
+          <dt>Capacidad</dt><dd>10,5 l (llenar ~9 l y comprobar cala)</dd>
+          <dt>Tipo</dt><dd>Castrol CRB Multi 15W40 CL-4/E7 (VDS-3)</dd>
+          <dt>Filtro</dt><dd>Filtron by Mann · DMarka Vigo</dd>
+          <dt>Tiempo</dt><dd>≈ 1,5 h</dd>
+        </dl></div>
+        <div class="card"><h3>Combustible</h3><dl>
+          <dt>Filtros</dt><dd>Antimoco + decantador + filtro motor</dd>
+          <dt>Decantador</dt><dd>Delphi 296 · Filtron 944</dd>
+          <dt>Ojo</dt><dd>Prefiltro y filtro motor no son iguales. Purgar.</dd>
+        </dl></div>
+        <div class="card"><h3>Refrigeración</h3><dl>
+          <dt>Impeller</dt><dd>Kit 21951346 · 3862281 · impeller 825940</dd>
+          <dt>Refrigerante</dt><dd>9,5 l · G12 verde 10–30 % (Carper)</dd>
+          <dt>Ánodo calentador</dt><dd>16 × 200 mm, rosca M6</dd>
+        </dl></div>
+        <div class="card"><h3>Admisión y correa</h3><dl>
+          <dt>Filtro aire</dt><dd>OEM 3580509 (equivalente RecMar / Parts4Engines)</dd>
+          <dt>Correa</dt><dd>978710 · ref. 3584086 (plana)</dd>
+        </dl></div>
+      </div>
+      <p class="muted" style="font-size:13px">Extraído de «00_MANTENIMIENTO MOTOR.docx» (carpeta 3_Mantenimiento).</p>
+    </div>
+  </section>
+
+  <footer>Datos iniciales importados de «0_MANTENIMIENTO_INVENTARIO_GASTOS LIBERTAD.xlsx» el 17-10-2026. Los cambios que hagas aquí se guardan en el libro.</footer>
+</div></main>
+
+<dialog id="dlg"><form id="dlgForm" method="dialog"></form></dialog>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const TODAY=new Date(); TODAY.setHours(0,0,0,0);
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const parse=s=>{if(!s)return null;const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const fmt=s=>{const d=parse(s);return d?d.toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'}).replace('.',''):'—'};
+const addMonths=(s,m)=>{const d=parse(s);const day=d.getDate();d.setDate(1);d.setMonth(d.getMonth()+m);const last=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();d.setDate(Math.min(day,last));return iso(d)};
+const days=s=>Math.round((parse(s)-TODAY)/864e5);
+const eur=n=>(n??0).toLocaleString('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0});
+const eur2=n=>n==null?'—':n.toLocaleString('es-ES',{style:'currency',currency:'EUR'});
+const PER={2:'Bimensual',3:'Trimestral',6:'Semestral',12:'Anual',24:'Cada 2 años',36:'Cada 3 años',60:'Cada 5 años',84:'Cada 7 años',120:'Cada 10 años'};
+const perTxt=m=>m?(PER[m]||('Cada '+m+' meses')):'Según estado';
+const SISTEMAS=['Motor','Casco y varada','Seguridad','Gas','Cubierta','Aparejo','Habitabilidad','Electricidad y electrónica'];
+$('#today').textContent=TODAY.toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'});
+
+let S={revisiones:[],pendientes:[],gastos:[],compras:[]};
+let loaded=false, db=null, readOnly=false;
+let thr=60, tab='rev', lightFilter=null, sysFilter='Todos', penFilter='abiertos';
+try{const t=localStorage.getItem('lib.thr');if(t)thr=+t;const tb=localStorage.getItem('lib.tab');if(tb)tab=tb}catch(e){}
+$('#thr').value=String(thr);
+
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('on'),2200)}
+
+function status(r){
+  let p=r.proxima;
+  if(!p&&r.ultima&&r.meses)p=addMonths(r.ultima,r.meses);
+  if(!p)return{st:'gris',p:null,d:null};
+  const d=days(p);
+  return{st:d<0?'rojo':d<=thr?'ambar':'verde',p,d};
+}
+function whenTxt(d){
+  if(d==null)return'Sin fecha';
+  if(d<0){const a=-d;return a>60?'Vencida hace '+Math.round(a/30.4)+' meses':'Vencida hace '+a+' días'}
+  if(d===0)return'Vence hoy';
+  return d>60?'En '+Math.round(d/30.4)+' meses':'En '+d+' días';
+}
+
+/* ---------- render ---------- */
+function render(){
+  const R=S.revisiones.map(r=>({...r,...status(r)}));
+  const cnt={rojo:0,ambar:0,verde:0,gris:0};R.forEach(r=>cnt[r.st]++);
+  const L=[['rojo','Vencidas'],['ambar','Próximas ('+thr+' d)'],['verde','Al día'],['gris','Sin fecha']];
+  $('#lights').innerHTML=L.map(([k,l])=>`<button class="light" data-light="${k}" aria-pressed="${lightFilter===k}"><span class="lamp ${k}"></span><span><span class="n">${loaded?cnt[k]:'–'}</span><br><span class="l">${l}</span></span></button>`).join('');
+
+  // alertas
+  const al=R.filter(r=>r.st==='rojo'||r.st==='ambar').sort((a,b)=>a.d-b.d);
+  const hp=S.pendientes.filter(p=>p.prioridad==='alta'&&p.estado!=='hecho');
+  $('#alerts').classList.toggle('calm',loaded&&!al.length);
+  let h='';
+  if(!loaded)h='<li class="muted">Cargando el libro de mantenimiento…</li>';
+  else{
+    h+=al.map(r=>`<li><span class="dot ${r.st}"></span><span><b>${esc(r.elemento)}</b> <span class="muted">· ${esc(r.sistema)}</span></span><span class="when ${r.st}">${whenTxt(r.d)}</span></li>`).join('');
+    if(hp.length)h+=`<li><span class="dot rojo" style="opacity:.55"></span><span><b>${hp.length} arreglos de prioridad alta abiertos</b> <span class="muted">· ${esc(hp.slice(0,3).map(p=>p.tarea).join(' · '))}${hp.length>3?'…':''}</span></span><span class="when"><button class="btn ghost small" data-go="pen">Ver</button></span></li>`;
+    if(!h)h='<li><span class="dot verde"></span><span>Todo al día. Ninguna revisión vence en los próximos '+thr+' días.</span><span></span></li>';
+  }
+  $('#alertList').innerHTML=h;
+
+  $('#c-rev').textContent=S.revisiones.length||'';
+  $('#c-pen').textContent=S.pendientes.filter(p=>p.estado!=='hecho').length||'';
+  $('#c-gas').textContent=S.gastos.length||'';
+  $('#c-com').textContent=S.compras.filter(c=>!c.comprado).length||'';
+
+  renderRev(R);renderPen();renderGas();renderCom();
+  document.querySelectorAll('.btn[data-w]').forEach(b=>b.disabled=readOnly);
+  ['#addRev','#addPen','#addGas','#addCom'].forEach(s=>$(s).disabled=readOnly||!loaded);
+}
+
+function renderRev(R){
+  const sys=['Todos',...SISTEMAS.filter(s=>R.some(r=>r.sistema===s))];
+  $('#sysChips').innerHTML=sys.map(s=>`<button class="chip" data-sys="${esc(s)}" aria-pressed="${sysFilter===s}">${esc(s)}</button>`).join('')+(lightFilter?` <button class="chip" data-clearlight aria-pressed="true">Filtro: ${({rojo:'vencidas',ambar:'próximas',verde:'al día',gris:'sin fecha'})[lightFilter]} ✕</button>`:'');
+  if(!loaded){return}
+  let rows=R.filter(r=>(sysFilter==='Todos'||r.sistema===sysFilter)&&(!lightFilter||r.st===lightFilter));
+  const order={rojo:0,ambar:1,verde:2,gris:3};
+  if(!rows.length){$('#revList').innerHTML='<div class="empty">No hay revisiones con este filtro.</div>';return}
+  const groups=SISTEMAS.filter(s=>rows.some(r=>r.sistema===s)).concat([...new Set(rows.map(r=>r.sistema))].filter(s=>!SISTEMAS.includes(s)));
+  $('#revList').innerHTML=groups.map(g=>{
+    const rs=rows.filter(r=>r.sistema===g).sort((a,b)=>order[a.st]-order[b.st]||(a.d??1e9)-(b.d??1e9));
+    return `<div class="group"><div class="group-h">${esc(g)} · ${rs.length}</div>`+rs.map(r=>{
+      let pct=0;
+      if(r.ultima&&r.p){const tot=(parse(r.p)-parse(r.ultima))/864e5;const el=(TODAY-parse(r.ultima))/864e5;pct=tot>0?Math.max(0,Math.min(100,el/tot*100)):100}
+      else if(r.st==='rojo')pct=100;
+      const col={rojo:'var(--bad)',ambar:'var(--warn)',verde:'var(--ok)',gris:'var(--none)'}[r.st];
+      return `<div class="rev">
+        <span class="dot ${r.st}" title="${r.st}"></span>
+        <div style="min-width:0"><div class="name">${esc(r.elemento)}</div>
+          <div class="obs">${esc(perTxt(r.meses))}${r.proveedor?' · '+esc(r.proveedor):''}${r.obs?' · '+esc(r.obs):''}</div></div>
+        <div class="c-ult"><div class="k">Última</div><div class="v">${fmt(r.ultima)}</div></div>
+        <div class="c-prox"><div class="k">Próxima</div><div class="v">${fmt(r.p)}</div></div>
+        <div class="c-state"><span class="pill ${r.st}">${whenTxt(r.d)}</span>${r.p&&r.ultima?`<div class="meter" title="${Math.round(pct)} % del intervalo consumido"><i style="width:${pct}%;background:${col}"></i></div>`:''}</div>
+        <div class="actions"><button class="btn small" data-w data-done="${esc(r.id)}">Hecho</button><button class="btn ghost small" data-w data-edit="${esc(r.id)}">Editar</button></div>
+      </div>`}).join('')+'</div>'}).join('');
+}
+
+function renderPen(){
+  const F=[['abiertos','Abiertos'],['alta','Prioridad alta'],['revisar','A revisar'],['hecho','Hechos'],['todos','Todos']];
+  $('#penChips').innerHTML=F.map(([k,l])=>`<button class="chip" data-pf="${k}" aria-pressed="${penFilter===k}">${l}</button>`).join('');
+  if(!loaded){$('#penList').innerHTML='';return}
+  const po={alta:0,media:1,baja:2,'':3};
+  let rows=S.pendientes.filter(p=>penFilter==='todos'||(penFilter==='abiertos'&&p.estado!=='hecho')||(penFilter==='alta'&&p.prioridad==='alta'&&p.estado!=='hecho')||p.estado===penFilter);
+  rows.sort((a,b)=>(a.estado==='hecho')-(b.estado==='hecho')||po[a.prioridad||'']-po[b.prioridad||'']);
+  $('#penList').innerHTML=rows.length?rows.map(p=>`<div class="task ${p.estado==='hecho'?'done':''}">
+    <span class="prio ${esc(p.prioridad)}">${esc(p.prioridad||'—')}</span>
+    <div style="min-width:0"><div class="t">${esc(p.tarea)}</div><div class="muted" style="font-size:13px">${[p.proveedor,p.obs].filter(Boolean).map(esc).join(' · ')}</div></div>
+    <div class="actions"><button class="state ${esc(p.estado)}" data-w data-cycle="${esc(p.id)}" title="Cambiar estado">${({pendiente:'Pendiente',revisar:'A revisar',hecho:'Hecho'})[p.estado]||p.estado}</button><button class="btn ghost small" data-w data-pedit="${esc(p.id)}">Editar</button></div>
+  </div>`).join(''):'<div class="empty">Nada en esta lista.</div>';
+}
+
+function renderGas(){
+  if(!loaded){return}
+  const G=S.gastos;
+  const total=G.reduce((s,g)=>s+(g.importe||0),0);
+  const byY={};G.forEach(g=>{const y=g.fecha?g.fecha.slice(0,4):'s/f';byY[y]=(byY[y]||0)+(g.importe||0)});
+  const years=Object.keys(byY).filter(y=>y!=='s/f').sort();
+  const cy=String(TODAY.getFullYear());
+  $('#gasKpis').innerHTML=`<div class="kpi"><div class="n mono">${eur(total)}</div><div class="l">Total registrado</div></div>
+    <div class="kpi"><div class="n mono">${eur(byY[cy]||0)}</div><div class="l">En ${cy} (con fecha)</div></div>
+    ${byY['s/f']?`<div class="kpi"><div class="n mono">${eur(byY['s/f'])}</div><div class="l">Sin fecha anotada</div></div>`:''}`;
+  // gráfico de barras por año
+  const keys=years.concat(byY['s/f']?['s/f']:[]);
+  const W=640,H=230,pl=56,pr=10,pt=18,pb=30;
+  const max=Math.max(...keys.map(k=>byY[k]),1);
+  const step=max>8000?2000:max>4000?1000:500;const top=Math.ceil(max/step)*step;
+  const bw=(W-pl-pr)/keys.length;
+  let svg=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Gasto por año">`;
+  for(let v=0;v<=top;v+=step){const y=pt+(H-pt-pb)*(1-v/top);svg+=`<line x1="${pl}" x2="${W-pr}" y1="${y}" y2="${y}" stroke="var(--line)" stroke-width="1"/><text x="${pl-8}" y="${y+4}" text-anchor="end" font-size="11" fill="var(--muted)" font-family="IBM Plex Mono,monospace">${(v/1000).toLocaleString('es-ES')}k</text>`}
+  keys.forEach((k,i)=>{const v=byY[k];const h=(H-pt-pb)*v/top;const x=pl+i*bw+bw*.2;const y=H-pb-h;
+    const fill=k==='s/f'?'var(--none)':k===cy?'var(--accent)':'var(--brand)';
+    svg+=`<rect x="${x}" y="${y}" width="${bw*.6}" height="${h}" rx="3" fill="${fill}"><title>${k}: ${eur(v)}</title></rect>
+      <text x="${x+bw*.3}" y="${y-5}" text-anchor="middle" font-size="11" fill="var(--fg)" font-family="IBM Plex Mono,monospace">${eur(v)}</text>
+      <text x="${x+bw*.3}" y="${H-pb+17}" text-anchor="middle" font-size="12" fill="var(--muted)" font-family="IBM Plex Mono,monospace">${k}</text>`});
+  svg+='</svg>';
+  $('#gasChart').innerHTML=svg;
+  const rows=[...G].sort((a,b)=>(b.fecha||'9999').localeCompare(a.fecha||'9999'));
+  $('#gasRows').innerHTML=rows.map(g=>`<tr><td class="mono" style="white-space:nowrap">${g.fecha?fmt(g.fecha):'<span class="muted">s/f</span>'}</td><td>${esc(g.actividad)}</td><td class="muted">${esc(g.empresa)}</td><td class="num">${eur2(g.importe)}</td><td><button class="btn ghost small" data-w data-gedit="${esc(g.id)}">Editar</button></td></tr>`).join('');
+}
+
+function renderCom(){
+  if(!loaded){$('#comList').innerHTML='';return}
+  const C=[...S.compras].sort((a,b)=>a.comprado-b.comprado);
+  $('#comList').innerHTML=C.length?C.map(c=>`<label class="buy ${c.comprado?'done':''}"><input type="checkbox" data-buy="${esc(c.id)}" ${c.comprado?'checked':''} ${readOnly?'disabled':''}>
+    <span style="min-width:0"><span class="t">${esc(c.objeto)}</span>${c.proveedor?` <span class="muted">· ${esc(c.proveedor)}</span>`:''}</span>
+    <span class="mono">${c.precio!=null?eur2(c.precio):''}</span></label>`).join(''):'<div class="empty">La lista está vacía.</div>';
+}
+
+/* ---------- pestañas y filtros ---------- */
+function setTab(t){tab=t;try{localStorage.setItem('lib.tab',t)}catch(e){}
+  document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
+  ['rev','pen','gas','com','mot'].forEach(k=>$('#p-'+k).hidden=k!==t)}
+setTab(['rev','pen','gas','com','mot'].includes(tab)?tab:'rev');
+$('#tabs').addEventListener('click',e=>{const b=e.target.closest('.tab');if(b)setTab(b.dataset.tab)});
+$('#thr').addEventListener('change',e=>{thr=+e.target.value;try{localStorage.setItem('lib.thr',thr)}catch(_){}render()});
+
+document.addEventListener('click',e=>{
+  const t=e.target.closest('button,[data-buy]');if(!t)return;
+  const d=t.dataset;
+  if(d.light){lightFilter=lightFilter===d.light?null:d.light;setTab('rev');render();return}
+  if('clearlight' in d){lightFilter=null;render();return}
+  if(d.sys){sysFilter=d.sys;render();return}
+  if(d.pf){penFilter=d.pf;render();return}
+  if(d.go){setTab(d.go);penFilter='alta';render();return}
+  if(d.done)return openDone(d.done);
+  if(d.edit)return openRev(d.edit);
+  if(d.cycle)return cycle(d.cycle);
+  if(d.pedit)return openPen(d.pedit);
+  if(d.gedit)return openGas(d.gedit);
+});
+document.addEventListener('change',e=>{const id=e.target.dataset&&e.target.dataset.buy;if(!id)return;
+  const c=S.compras.find(x=>x.id===id);if(!c)return;c.comprado=e.target.checked;save('compras',c.comprado?'Marcado como comprado':'Vuelve a la lista')});
+$('#addRev').onclick=()=>openRev(null);
+$('#addPen').onclick=()=>openPen(null);
+$('#addGas').onclick=()=>openGas(null);
+$('#addCom').onclick=()=>openCom();
+
+/* ---------- diálogos ---------- */
+const dlg=$('#dlg'),form=$('#dlgForm');let onSubmit=null;
+function openDlg(title,html,submit,extra=''){form.innerHTML=`<h2>${esc(title)}</h2>${html}<div class="dlg-actions">${extra}<button type="button" class="btn ghost" id="dlgCancel">Cancelar</button><button class="btn" type="submit">Guardar</button></div>`;
+  onSubmit=submit;$('#dlgCancel').onclick=()=>dlg.close();
+  const del=form.querySelector('[data-del]');if(del)del.onclick=()=>{del.textContent==='¿Seguro?'?(del._fn(),dlg.close()):(del.textContent='¿Seguro?')};
+  dlg.showModal();}
+form.addEventListener('submit',e=>{e.preventDefault();const fd=Object.fromEntries(new FormData(form));if(onSubmit&&onSubmit(fd)!==false)dlg.close()});
+const fld=(id,label,input)=>`<div class="field"><label for="${id}">${label}</label>${input}</div>`;
+const numOrNull=v=>{if(v==null||String(v).trim()==='')return null;const n=parseFloat(String(v).replace(',','.'));return isNaN(n)?null:n};
+const newId=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+
+function openDone(id){const r=S.revisiones.find(x=>x.id===id);if(!r)return;
+  const prox=r.meses?addMonths(iso(TODAY),r.meses):'';
+  openDlg('Registrar: '+r.elemento,
+    `<div class="row2">${fld('d_fecha','Fecha realizada',`<input id="d_fecha" name="fecha" type="date" required value="${iso(TODAY)}">`)}
+      ${fld('d_prox','Próxima revisión',`<input id="d_prox" name="proxima" type="date" value="${prox}">`)}</div>
+     <div class="row2">${fld('d_coste','Coste (€, opcional)',`<input id="d_coste" name="coste" inputmode="decimal" placeholder="0">`)}
+      ${fld('d_prov','Quién lo hizo',`<input id="d_prov" name="proveedor" value="${esc(r.proveedor||'')}">`)}</div>
+     ${fld('d_nota','Nota',`<input id="d_nota" name="nota" placeholder="Horas motor, piezas, observaciones…">`)}
+     <p class="muted" style="margin:0;font-size:13px">${r.meses?'La próxima se calcula sumando '+perTxt(r.meses).toLowerCase()+' a la fecha realizada.':'Sin periodicidad fija: indica la próxima fecha si la quieres vigilar.'} Si anotas un coste, se añade a Gastos.</p>`,
+    fd=>{
+      r.ultima=fd.fecha;r.proxima=fd.proxima||(r.meses?addMonths(fd.fecha,r.meses):null);
+      if(fd.proveedor)r.proveedor=fd.proveedor;
+      const coste=numOrNull(fd.coste);
+      save('revisiones','Revisión registrada').then(ok=>{
+        if(ok&&coste){S.gastos.push({id:newId('g'),fecha:fd.fecha,actividad:r.elemento+(fd.nota?' — '+fd.nota:''),empresa:fd.proveedor||'',importe:coste});save('gastos','Revisión y gasto registrados')}
+      });
+    });
+  const df=$('#d_fecha');if(r.meses)df.addEventListener('change',()=>{if(df.value)$('#d_prox').value=addMonths(df.value,r.meses)});
+}
+
+function openRev(id){const r=id?S.revisiones.find(x=>x.id===id):{elemento:'',sistema:'Motor',meses:12,ultima:null,proxima:null,obs:'',proveedor:'',prioridad:'media'};if(!r)return;
+  const per=[['','Según estado (sin periodicidad)'],...Object.entries(PER)];
+  openDlg(id?'Editar revisión':'Nueva revisión',
+    `${fld('r_el','Elemento',`<input id="r_el" name="elemento" required value="${esc(r.elemento)}">`)}
+     <div class="row2">${fld('r_sis','Sistema',`<select id="r_sis" name="sistema">${SISTEMAS.map(s=>`<option ${s===r.sistema?'selected':''}>${s}</option>`).join('')}</select>`)}
+      ${fld('r_per','Periodicidad',`<select id="r_per" name="meses">${per.map(([v,l])=>`<option value="${v}" ${String(r.meses??'')===v?'selected':''}>${l}</option>`).join('')}</select>`)}</div>
+     <div class="row2">${fld('r_ult','Última',`<input id="r_ult" name="ultima" type="date" value="${r.ultima||''}">`)}
+      ${fld('r_prox','Próxima (vacío = calcular)',`<input id="r_prox" name="proxima" type="date" value="${r.proxima||''}">`)}</div>
+     ${fld('r_prov','Proveedor / quién',`<input id="r_prov" name="proveedor" value="${esc(r.proveedor||'')}">`)}
+     ${fld('r_obs','Observaciones',`<textarea id="r_obs" name="obs">${esc(r.obs||'')}</textarea>`)}`,
+    fd=>{Object.assign(r,{elemento:fd.elemento.trim(),sistema:fd.sistema,meses:fd.meses?+fd.meses:null,ultima:fd.ultima||null,proxima:fd.proxima||null,proveedor:fd.proveedor.trim(),obs:fd.obs.trim()});
+      if(!id){r.id=newId('r');S.revisiones.push(r)}save('revisiones',id?'Revisión actualizada':'Revisión añadida')},
+    id?`<button type="button" class="btn ghost" data-del style="margin-right:auto;color:var(--bad)">Eliminar</button>`:'');
+  const del=form.querySelector('[data-del]');if(del)del._fn=()=>{S.revisiones=S.revisiones.filter(x=>x!==r);save('revisiones','Revisión eliminada')};
+}
+
+function cycle(id){const p=S.pendientes.find(x=>x.id===id);if(!p)return;const n={pendiente:'revisar',revisar:'hecho',hecho:'pendiente'};p.estado=n[p.estado]||'pendiente';
+  if(p.estado==='hecho')p.hecho=iso(TODAY);save('pendientes','Estado: '+({pendiente:'pendiente',revisar:'a revisar',hecho:'hecho'})[p.estado])}
+
+function openPen(id){const p=id?S.pendientes.find(x=>x.id===id):{tarea:'',estado:'pendiente',prioridad:'media',obs:'',proveedor:''};if(!p)return;
+  openDlg(id?'Editar arreglo':'Nuevo arreglo',
+    `${fld('p_t','Tarea',`<input id="p_t" name="tarea" required value="${esc(p.tarea)}">`)}
+     <div class="row2">${fld('p_pr','Prioridad',`<select id="p_pr" name="prioridad">${['alta','media','baja'].map(v=>`<option ${v===p.prioridad?'selected':''}>${v}</option>`).join('')}</select>`)}
+      ${fld('p_es','Estado',`<select id="p_es" name="estado">${[['pendiente','Pendiente'],['revisar','A revisar'],['hecho','Hecho']].map(([v,l])=>`<option value="${v}" ${v===p.estado?'selected':''}>${l}</option>`).join('')}</select>`)}</div>
+     ${fld('p_pv','Proveedor / quién',`<input id="p_pv" name="proveedor" value="${esc(p.proveedor||'')}">`)}
+     ${fld('p_o','Observaciones',`<textarea id="p_o" name="obs">${esc(p.obs||'')}</textarea>`)}`,
+    fd=>{Object.assign(p,{tarea:fd.tarea.trim(),prioridad:fd.prioridad,estado:fd.estado,proveedor:fd.proveedor.trim(),obs:fd.obs.trim()});
+      if(!id){p.id=newId('p');S.pendientes.push(p)}save('pendientes',id?'Arreglo actualizado':'Arreglo añadido')},
+    id?`<button type="button" class="btn ghost" data-del style="margin-right:auto;color:var(--bad)">Eliminar</button>`:'');
+  const del=form.querySelector('[data-del]');if(del)del._fn=()=>{S.pendientes=S.pendientes.filter(x=>x!==p);save('pendientes','Arreglo eliminado')};
+}
+
+function openGas(id){const g=id?S.gastos.find(x=>x.id===id):{fecha:iso(TODAY),actividad:'',empresa:'',importe:null};if(!g)return;
+  openDlg(id?'Editar gasto':'Anotar gasto',
+    `${fld('g_a','Concepto',`<input id="g_a" name="actividad" required value="${esc(g.actividad)}">`)}
+     <div class="row2">${fld('g_f','Fecha',`<input id="g_f" name="fecha" type="date" value="${g.fecha||''}">`)}
+      ${fld('g_i','Importe con IVA (€)',`<input id="g_i" name="importe" inputmode="decimal" value="${g.importe??''}">`)}</div>
+     ${fld('g_e','Empresa',`<input id="g_e" name="empresa" value="${esc(g.empresa||'')}">`)}`,
+    fd=>{Object.assign(g,{actividad:fd.actividad.trim(),fecha:fd.fecha||null,importe:numOrNull(fd.importe),empresa:fd.empresa.trim()});
+      if(!id){g.id=newId('g');S.gastos.push(g)}save('gastos',id?'Gasto actualizado':'Gasto anotado')},
+    id?`<button type="button" class="btn ghost" data-del style="margin-right:auto;color:var(--bad)">Eliminar</button>`:'');
+  const del=form.querySelector('[data-del]');if(del)del._fn=()=>{S.gastos=S.gastos.filter(x=>x!==g);save('gastos','Gasto eliminado')};
+}
+
+function openCom(){openDlg('Añadir a compras',
+  `${fld('c_o','Qué comprar',`<input id="c_o" name="objeto" required>`)}
+   <div class="row2">${fld('c_p','Dónde',`<input id="c_p" name="proveedor">`)}${fld('c_pr','Precio aprox. (€)',`<input id="c_pr" name="precio" inputmode="decimal">`)}</div>`,
+  fd=>{S.compras.push({id:newId('c'),objeto:fd.objeto.trim(),proveedor:fd.proveedor.trim(),precio:numOrNull(fd.precio),comprado:false});save('compras','Añadido a compras')})}
+
+/* ---------- datos ---------- */
+const pending={};
+async function save(name,msg){
+  render();
+  if(!db||readOnly){toast('No se puede guardar en esta vista');return false}
+  pending[name]=(pending[name]||Promise.resolve()).then(()=>db.doc('libro/'+name).set({items:JSON.parse(JSON.stringify(S[name])),actualizado:new Date().toISOString()}));
+  try{await pending[name];toast(msg);return true}
+  catch(e){if(e&&e.code==='invalid_argument'){readOnly=true;note('Esta vista es de solo lectura: los cambios no se guardan.');render()}else toast('No se pudo guardar. Vuelve a intentarlo.');return false}
+}
+function note(m){const n=$('#sysnote');n.textContent=m;n.hidden=false}
+
+render();
+(async()=>{
+  if(!window.claude||!window.claude.use){note('El libro solo se puede consultar abierto en Claude.');return}
+  db=await window.claude.use('db');
+  if(!db){note('No se ha podido abrir la base de datos del libro en esta vista.');return}
+  try{const user=await window.claude.use('user');if(user){const can=await user.can('data.write');if(can===false){readOnly=true;note('Vista de solo lectura.')}}}catch(e){}
+  db.collection('libro').onSnapshot(snap=>{
+    snap.docs.forEach(d=>{if(d.exists&&S.hasOwnProperty(d.id)){const v=d.data();S[d.id]=JSON.parse(JSON.stringify(v.items||[]))}});
+    loaded=true;
+    if(snap.empty)note('El libro está vacío. Añade la primera revisión con «Nueva revisión».');
+    render();
+  },err=>{note('Se ha perdido la conexión con el libro. Recarga la página.')});
+})();
+})();
+</script>
+
+</body></html>
